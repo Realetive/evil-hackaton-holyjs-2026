@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 	<head>
 		<meta charset="utf-8" />
 		<meta
@@ -7,20 +7,2685 @@
 			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 		/>
 
-		<title>reveal.js</title>
+		<title>HolyJS 2026 • Убойный хакатон</title>
 
 		<link rel="stylesheet" href="dist/reset.css" />
 		<link rel="stylesheet" href="dist/reveal.css" />
 		<link rel="stylesheet" href="dist/theme/black.css" />
 
-		<!-- Theme used for syntax highlighted code -->
 		<link rel="stylesheet" href="dist/plugin/highlight/monokai.css" />
+		<link rel="stylesheet" href="css/vn.css" />
+		<style>
+			.reveal pre code {
+				max-height: 520px;
+			}
+			/* reveal gives sections auto height; absolutely positioned .vn__scene
+			   contributes nothing, so VN sections must fill the canvas explicitly */
+			section.vn {
+				height: 100%;
+			}
+			section.menu {
+				height: 100%;
+			}
+			.vn__scene {
+				position: absolute;
+				inset: 0;
+			}
+			/* внутренний голос — курсив */
+			.vn__message_thought {
+				font-style: italic;
+				opacity: 0.85;
+			}
+			/* эффект-объекты: оверлеи поверх сцены (смерти/удары «за кадром») */
+			.vn__fx {
+				position: absolute;
+				pointer-events: none;
+				z-index: 1;
+			}
+			.vn__fx_bees {
+				animation: vn-bob 1.2s ease-in-out infinite alternate;
+			}
+			@keyframes vn-bob {
+				from { translate: 0 0; }
+				to { translate: 0 -14px; }
+			}
+			/* меню титульного экрана (VN-токены, только index) */
+			.vn-menu {
+				position: absolute;
+				inset: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				gap: 22px;
+			}
+			.vn-menu__btn {
+				width: 30%;
+				padding: 16px 0;
+				font-size: 30px;
+				font-family: inherit;
+				letter-spacing: 0.04em;
+				color: #cfd8e8;
+				background: rgba(16, 20, 28, 0.85);
+				border: 1px solid rgba(122, 162, 247, 0.35);
+				border-radius: 6px;
+				cursor: pointer;
+				transition: color 0.18s ease, border-color 0.18s ease,
+					background 0.18s ease, box-shadow 0.18s ease;
+			}
+			.vn-menu__btn_selected {
+				color: #ffffff;
+				border-color: #7aa2f7;
+				background: rgba(122, 162, 247, 0.18);
+				box-shadow: 0 0 18px rgba(122, 162, 247, 0.55);
+			}
+			/* финальный backstage-цикл: 6 кадров по 15с, кроссфейд 1.5с, Ken Burns */
+			section.bts {
+				height: 100%;
+			}
+			.bts__frame {
+				position: absolute;
+				inset: 0;
+				overflow: hidden;
+			}
+			.bts__img {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				opacity: 0;
+				animation: bts-fade 90s linear infinite, bts-zoom 15s ease-in-out infinite;
+			}
+			@keyframes bts-fade {
+				0% { opacity: 0; }
+				1.67% { opacity: 1; }
+				16.67% { opacity: 1; }
+				18.33% { opacity: 0; }
+				100% { opacity: 0; }
+			}
+			@keyframes bts-zoom {
+				from { scale: 1; }
+				to { scale: 1.06; }
+			}
+			@media (prefers-reduced-motion: reduce) {
+				.bts__img {
+					animation: bts-fade 90s linear infinite;
+				}
+			}
+			/* эффект-титры: эхо, ветка, stack trace */
+			.fx-title {
+				font-size: 72px;
+				font-weight: 800;
+				letter-spacing: 0.04em;
+				line-height: 1.15;
+			}
+			.fx-sub {
+				font-size: 26px;
+				opacity: 0.7;
+				margin-top: 24px;
+			}
+			.fx-stacktrace {
+				font-family: monospace;
+				font-size: 22px;
+				color: #ff6b6b;
+				text-align: left;
+				white-space: pre;
+			}
+			/* честный слайд */
+			.honesty {
+				font-size: 20px;
+			}
+			.honesty th,
+			.honesty td {
+				padding: 4px 12px;
+			}
+			.honesty td:first-child {
+				font-weight: 700;
+			}
+			.honesty td:nth-child(2) {
+				color: #7aa2f7;
+				font-family: monospace;
+			}
+		</style>
 	</head>
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<!-- TODO: Перепроверить заголовки (нейрослоп)  -->
+
+				<!-- ============ ТИТУЛЬНОЕ МЕНЮ ============ -->
+
+				<!-- Т0.1 Титул: фокус на «Новая игра» -->
+				<section class="menu" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn-menu">
+						<button type="button" class="vn-menu__btn vn-menu__btn_selected">Новая игра</button>
+						<button type="button" class="vn-menu__btn">Настройки</button>
+						<button type="button" class="vn-menu__btn">Об авторе</button>
+					</div>
+					<aside class="notes">
+						<p>Добрый вечер, дорогие участники <b>ЮБИЛЕЙНОГО</b> HolyJS!</p>
+						<p>Эти апплодисменты — для вас</p>
+						<p>Спасибо, что пришли на этот практически заключительный доклад</p>
+						<p>Отдельное спасибо всем, кто смотрит трансляцию или запись</p>
+						<p>
+							Понимаю, как ВЫ, наверняка УСТАЛИ ЗА ЭТИ ДНИ, голова гудит от информации,
+							но мой ДОКЛАД вряд ли ПРИВНЕСЁТ что-то НОВОЕ, скорее это СВЕЖЕЕ ПРОЧТЕНИЕ
+							насущных ПРОБЛЕМ, с которыми вы, ВОЗМОЖНО, сталкивались при работе со
+							СТЕЙТ-МЕНЕДЖЕРАМИ.
+						</p>
+					</aside>
+				</section>
+
+				<!-- Т0.2 Титул: фокус на «Настройки» -->
+				<section class="menu" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn-menu">
+						<button type="button" class="vn-menu__btn">Новая игра</button>
+						<button type="button" class="vn-menu__btn vn-menu__btn_selected">Настройки</button>
+						<button type="button" class="vn-menu__btn">Об авторе</button>
+					</div>
+					<aside class="notes">Фокус на «Настройки».</aside>
+				</section>
+
+				<!-- Т0.3 Титул: фокус на «Об авторе» -->
+				<section class="menu" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn-menu">
+						<button type="button" class="vn-menu__btn">Новая игра</button>
+						<button type="button" class="vn-menu__btn">Настройки</button>
+						<button type="button" class="vn-menu__btn vn-menu__btn_selected">Об авторе</button>
+					</div>
+					<aside class="notes">Фокус на «Об авторе».</aside>
+				</section>
+
+				<!-- Т0.4 Экран «Об авторе» (заглушка) -->
+				<section data-background-color="#14121f">
+					<h2>Об авторе</h2>
+					<ol style="padding: 4vh;">
+						<li  class="fragment">занимаюсь разработкой 15+ лет (с ≈2010 г.);</li>
+						<li  class="fragment">с 2022 г. в <u>Сбере</u><span class="fragment">, до этого — Яндекс</span><span class="fragment">, до этого — NevaTrip;</span></li>
+						<li  class="fragment">эксперт Web3.0, indie-разработчик, ментор;</li>
+						<li  class="fragment"><u>открывал</u> бар in💯gramm;</li>
+						<li class="fragment"><u>выступал</u> в
+							<span class="fragment">Питере,</span>
+							<span class="fragment">Минске,</span>
+							<span class="fragment">Киеве,</span>
+							<span class="fragment">Москве</span>
+							<span class="fragment">на Web Standards Days,</span>
+							<span class="fragment">MODXpo,</span>
+							<span class="fragment">HolyJS,</span>
+							<span class="fragment">PiterCSS,</span>
+							<span class="fragment">MoscowCSS,</span>
+							<span class="fragment">MoscowJS,</span>
+							<span class="fragment">Podlodka Crew,</span>
+							<span class="fragment">SPB Frontend,</span>
+							<span class="fragment">FrontendNight,</span>
+							<span class="fragment">IT Global Meetup,</span>
+							<span class="fragment">ProIT Fest…</span>
+						</li>
+					</ol>
+					<aside class="notes">
+						<ol>
+							<li>занимаюсь разработкой 15+ лет (с ≈2010 г.)</li>
+							<li>
+								сейчас причинаю добро и наношу непопровимую пользу в Сбере,  <br>
+								до этого — в Яндексе, <br>
+								до этого — в NevaTripe <br>
+								всем коллегам — ПЛАМЕННЫЙ ПРИВЕТ!
+							</li>
+							<li>Гений, миллиардер, плейбой, филантроп</li>
+							<li>
+								<u>открывал</u> бар in💯gramm <br>
+								кто был в баре — похлопайте, пожалуйста <br>
+								этот проект существовал ДЛЯ ВАС и благодаря ВАМ!
+							</li>
+							<li>выступал …  <br>
+								HolyJS — спасибо за организацию этого Holy!<br>
+								11 лет! 200 конференций! как быстро летит время!<br>
+								… ProIT Fest</li>
+						</ol>
+					</aside>
+				</section>
+
+				<!-- Т0.3 Титул: фокус на «Об авторе» -->
+				<section class="menu" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn-menu">
+						<button type="button" class="vn-menu__btn">Новая игра</button>
+						<button type="button" class="vn-menu__btn">Настройки</button>
+						<button type="button" class="vn-menu__btn vn-menu__btn_selected">Об авторе</button>
+					</div>
+					<aside class="notes">Фокус на «Об авторе».</aside>
+				</section>
+				
+				<!-- Т0.2 Титул: фокус на «Настройки» -->
+				<section class="menu" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn-menu">
+						<button type="button" class="vn-menu__btn">Новая игра</button>
+						<button type="button" class="vn-menu__btn vn-menu__btn_selected">Настройки</button>
+						<button type="button" class="vn-menu__btn">Об авторе</button>
+					</div>
+					<aside class="notes">Фокус на «Настройки».</aside>
+				</section>
+
+				<!-- Т0.1 Титул: фокус на «Новая игра» -->
+				<section class="menu" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn-menu">
+						<button type="button" class="vn-menu__btn vn-menu__btn_selected">Новая игра</button>
+						<button type="button" class="vn-menu__btn">Настройки</button>
+						<button type="button" class="vn-menu__btn">Об авторе</button>
+					</div>
+					<aside class="notes">
+						«Новая игра» <br>
+						ГОТОВЫ? Давайте начинать!
+					</aside>
+				</section>
+
+				<!-- ============ ЗАЧИН (трейлер) ============ -->
+				
+				<!-- Т1. Зачин: трейлер -->
+				<section class="vn" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn__scene">
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Кузьма и Прохор проводят сеанс параллельного собеседования кандидатов
+								на стажировку в их команду. В финал вышли девять претендентов.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Кузьма и Прохор проводят сеанс параллельного собеседования кандидатов
+						на стажировку в их команду. <br>
+						<b>В ФИНАЛ после 20 ЭТАПОВ собеседований с, как они себя называют, «эй!-чарами» вышли ДЕВЯТЬ ПРЕТЕНДЕНТОВ.</b>
+					</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn__scene">
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Но в конце останется ТОЛЬКО! ОДИН!!!
+								<span class="fragment">ПОБЕДИТЕЛЬ?</span>
+								<span class="fragment">Нет. Стейт-менеджер.</span>
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Но в конце останется ТОЛЬКО! ОДИН!!! ПОБЕДИТЕЛЬ? Нет.
+						Стейт-менеджер. <br>
+						СЕГОДНЯ вас ждёт ОСТРОСЮЖЕТНЫЙ хакатон. <br>
+						Только на экранах HOLYJS!!!!
+					</aside>
+				</section>
+
+				<!-- Т2. Зачин: ценз -->
+				<section class="vn" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+					<div class="vn__scene">
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Возрастные ограничения: не менее 5 выгораний — или 3+ успешно
+								запущенных проекта, написанных с нуля.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Небольшой дисклеймер. <br>
+						Теперь, когда я вас ПРЕДУПРЕДИЛ, давайте поближе познакомимся с НАШИМИ ГЕРОЯМИ<br>
+					</aside>
+				</section>
+
+				<!-- ============ СЦЕНА 0. «ЗАПРАВКА» ============ -->
+
+				<!-- 0.1 Рассказчик -->
+				<section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_right" src="dist/image/character/kuzma/kuzma-neutral.png" alt="Кузьма" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Кузьма — спокойный и невозмутимый тех. дир, заставший 3,5" дискеты и Баш.орг.
+								Пишет на всём, что компилируется, настоящий профессионал
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Кузьма — спокойный и невозмутимый тех. дир, заставший 3,5" дискеты и Баш.орг. <br>
+						Пишет на всём, что компилируется, настоящий профессионал
+					</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/kuzma/kuzma-neutral.png" alt="Кузьма" />
+						<img class="vn__person vn__person_left" src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile) — плейсхолдер" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Прохор — заботливый и опытный тим. лид. Тоже из «старой школы».
+								Не забывает делать бэкапы и может по звуку отличить Cherry MX Brown от Blue.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						<p>ПЕРЕД НАЧАЛОМ испытания его коллега, Прохор, как заботливый и опытный ТИМЛИД,
+						ЗАИНТЕРЕСОВАННЫЙ в очевидно, самом <b>архитектурно-верном</b> РЕШЕНИИ
+						с <b>минимальной стоимостью</b> на ПОДДЕРЖКУ и РАЗВИТИЕ —
+						решает дать совет-напутствие перед началом хакатона-испытания…</p>
+						<p>Но Потап — очевидный АЛЬФА группы перебивает его:</p>
+					</aside>
+				</section>
+
+				<!-- 0.2 Потап перебивает -->
+				<section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile)" />
+						<img class="vn__person vn__person_right" src="dist/image/character/potap/potap-commanding.png" alt="Потап (commanding)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Потап</div>
+							<div class="vn__message">
+								TAILWIND! Мы возьмём Реакт, Vite v27.29.4 VIP Edition и Effector!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						TAILWIND! <br>
+						Мы возьмём РЕАКТ, Ви´т VIP Edition и Effector!
+					</aside>
+				</section>
+
+				<!-- 0.3 «Ради БЭМа» -->
+				<section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/prokhor/prokhor-neutral.png" alt="Прохор (neutral)" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/potap/potap-commanding.png" alt="Потап (commanding)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Прохор</div>
+							<div class="vn__message">
+								По взаимному согласию — ради БЭМа.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">По взаимному согласию — ради БЭМа.</aside>
+				</section>
+				
+				<!-- 0.4 Испуг -->
+				<section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/prokhor/prokhor-neutral.png" alt="Прохор (neutral)" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/potap/potap-terrified.png" alt="Потап (terrified)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Прохор недоумевает: почему студентов так испугало слово из трёх букв?
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Студенты в ужасе. Слово из трёх букв ПРОЗВУЧАЛО как ПРИГОВОР.
+						Его время объясниться придёт позже.
+					</aside>
+				</section>
+
+				<!-- 0.5 «Коммитьте почаще» -->
+				<section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/prokhor/prokhor-shout.png" alt="Прохор (shout)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Прохор</div>
+							<div class="vn__message">
+								Главное — коммитьте почаще!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						— Главное — коммитьте почаще! <br>
+						кричит Прохор в спину убегающим студентам
+					</aside>
+				</section>
+
+				<!-- 0.6 Чай (ружьё Чехова) -->
+				<section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile) с коробкой чая" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Проходя мимо полки, Прохор берёт коробку ромашкового чая…
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Проходя мимо полки, Прохор берёт коробку ромашкового чая. <br>
+						Просто любит чай. <br>
+						Запомните этот чай.
+					</aside>
+				</section>
+				
+				<section data-background-color="#05070c">
+					<aside class="notes">
+						Смена сцены/кадра
+					</aside>
+				</section>
+
+				<!-- ============ СЦЕНА 1. «ОЗЕРО» ============ -->
+
+				<!-- 1.1 Вайбкодинг в озере -->
+				<section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/nina/nina-neutral.png" alt="Нина (neutral)" />
+						<img class="vn__person vn__person_right" src="dist/image/character/vasilisa/vasilisa-neutral.png" alt="Василиса (neutral)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Студенты вайбкодят прямо в озере: ноуты на надувных подлокотниках,
+								вода кипит от запросов к ИИ.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Студенты разбивают лагерь у озера и сразу приступают к ХАКАТОНУ
+					</aside>
+				</section>
+
+				<!-- 1.2 Лимиты -->
+				<section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/alisa/alisa-neutral.png" alt="Алиса (neutral)" />
+						<img class="vn__person vn__person_right" src="dist/image/character/vasilisa/vasilisa-neutral.png" alt="Василиса (neutral)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Василиса</div>
+							<div class="vn__message">
+								Лимиты обновились! Бежим скорее вайбкодить!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Василиса: «Лимиты обновились! Бежим скорее вайбкодить!» <br>
+						Все выбегают из озера. Алиса остаётся.
+					</aside>
+				</section>
+
+				<!-- 1.3 Ветка утонула -->
+				<section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/alisa/alisa-panic.png" alt="Алиса (panic)" />
+						<img class="vn__fx" style="left: 10%; top: 42%; width: 34%" src="dist/image/object/splash.png" alt="всплеск" />
+						<div class="vn__dialog">
+							<div class="vn__name">Алиса</div>
+							<div class="vn__message">
+								Ветка утонула!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Ноутбук выскальзывает и тонет. Вместе с веткой. Всей работы. Алиса ныряет следом.</aside>
+				</section>
+
+				<!-- 1.4 Прохор спасает -->
+				<section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/prokhor/prokhor-concerned.png" alt="Прохор (concerned)" />
+						<img class="vn__person vn__person_right vn__person_mirror vn__person_inactive" src="dist/image/character/alisa/alisa-neutral.png" alt="Алиса (neutral)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Прохор</div>
+							<div class="vn__message">
+								SSH теперь по-новой создавать…
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Прохор вытаскивает Алису и ноутбук. Чинит на берегу, бормочет вполголоса: <br>
+						«SSH теперь по-новой создавать…»
+					</aside>
+				</section>
+
+				<!-- 1.5 Мысль Василисы -->
+				<section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile)" />
+						<img class="vn__person vn__person_right vn__person_mirror" src="dist/image/character/vasilisa/vasilisa-annoyed.png" alt="Василиса (annoyed)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Василиса</div>
+							<div class="vn__message vn__message_thought">
+								Опять этот дед произносит слова из трёх букв…
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Василиса: «Опять этот дед произносит слова из трёх букв…»
+					</aside>
+				</section>
+
+				<!-- 1.6 PGP -->
+				<section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile)" />
+						<img class="vn__person vn__person_right vn__person_mirror vn__person_inactive" src="dist/image/character/vasilisa/vasilisa-annoyed.png" alt="Василиса (annoyed)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Прохор</div>
+							<div class="vn__message">
+								Может, сразу PGP настроить?
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Прохор задумчиво БУБНИТ ПОД НОС: «Может, сразу PGP настроить?»
+					</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile)" />
+						<img class="vn__person vn__person_right vn__person_mirror" src="dist/image/character/vasilisa/vasilisa-annoyed.png" alt="Василиса (annoyed)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Василиса</div>
+							<div class="vn__message">
+								Снова слово из трёх букв! Чё за кринж!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Василиса: «Снова слово из трёх букв! Чё за кринж!» <br>
+						Василиса убегает догонять своих.
+					</aside>
+				</section>
+
+				<!-- 1.7 Крик Прохора -->
+				<section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/prokhor/prokhor-shout.png" alt="Прохор (shout)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Прохор</div>
+							<div class="vn__message">
+								Мы взяли вашу подругу — она промокла!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Прохор кричит им вслед: «Мы взяли вашу подругу — ОНА ПРОМОКЛА!»
+					</aside>
+				</section>
+
+				<!-- 1.8 Эхо -->
+				<section data-background-color="#05070c">
+					<br><br><br>
+					<h1 class="fx-title">«МЫ ВЗЯЛИ ВАШУ ПОДРУГУ…»</h1>
+					<p class="fx-sub">Студенты уже далеко. Они слышали только обрывок.<br />Этого достаточно.</p>
+					<aside class="notes">Но студенты уже далеко и ветер заглушает конец фразы…</aside>
+				</section>
+
+				<section data-background-color="#05070c">
+					<aside class="notes">
+						Прошла ночь…						
+					</aside>
+				</section>
+
+				<!-- ============ СЦЕНА 2. «ДОМ КУЗЬМЫ, РАЗВЕДКА» ============ -->
+
+				<!-- 2.1 Сборы -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/mikhail/mikhail-determined.png" alt="Михаил (determined), ноут под мышью" />
+						<img class="vn__person vn__person_right vn__person_mirror vn__person_inactive" src="dist/image/character/potap/potap-commanding.png" alt="Потап (commanding)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Утро. Ребята собираются показать Кузьме, что навайбкодили за ночь.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Утро. Ребята собираются показать Кузьме, что навайбкодили за ночь.</aside>
+				</section>
+
+				<!-- 2.2 Митя к окну -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_right vn__person_mirror" src="dist/image/character/vasilisa/vasilisa-annoyed.png" alt="Василиса (annoyed)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Первой к окну подходит Василиса. За стеклом — картина, которой она
+								не ждала.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Первой к окну подходит Василиса. За стеклом — картина, которой она
+						не ждала.
+					</aside>
+				</section>
+
+				<!-- 2.3 Кадр-в-кадре: окно -->
+				<section class="vn" data-background-image="dist/image/background/window-view.png" data-background-color="#33230f">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/alisa/alisa-sleeping.png" alt="Алиса (sleeping)" />
+						<img class="vn__person vn__person_right vn__person_mirror" src="dist/image/character/prokhor/prokhor-review-tea.png" alt="Прохор (review-tea)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Алиса неподвижна — лицом в код. Прохор колдует над ЕЁ ноутбуком…
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Алиса неподвижна — лицом в код. Прохор колдует над ЕЁ ноутбуком… <br>
+						Две чашки. Из них идёт пар.
+					</aside>
+				</section>
+
+				<!-- 2.4 Василиса считает -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_right" src="dist/image/character/vasilisa/vasilisa-thinking.png" alt="Василиса (thinking)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Василиса</div>
+							<div class="vn__message">
+								Так. Подруга внутри… чужой над её ноутом… не двигается…
+								и Потап говорил, что Алису взяли в плен. Всё сходится!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Василиса: «Так. Подруга внутри… чужой над её ноутом… не двигается… <br>
+						и Потап говорил, что Алису взяли в плен. Всё сходится!»
+					</aside>
+				</section>
+
+				<!-- КОД: Василиса, 5 флагов -->
+				<section data-background-color="#2e2414">
+					<h3>Василиса · useState</h3>
+					<pre><code class="language-js" data-line-numbers="1,3" data-trim data-trim-whitespace data-line-numbers>
+function ReconDecision() {
+  …
+}
+					</code></pre>
+					<aside class="notes"> // Что Василиса увидела в окно дома Кузьмы — и во что это превратилось</aside>
+				</section>
+
+				<section data-background-color="#2e2414">
+					<h3>Василиса · useState</h3>
+					<pre><code class="language-js" data-line-numbers="2, 5" data-trim data-trim-whitespace data-line-numbers>
+function ReconDecision() {
+	const [friendInside, setFriendInside] = useState(true)
+
+	if (
+		friendInside
+	) {}
+}
+					</code></pre>
+					<aside class="notes">Её подруга внутри…</aside>
+				</section>
+
+				<section data-background-color="#2e2414">
+					<h3>Василиса · useState</h3>
+					<pre><code class="language-js" data-line-numbers="3,7" data-trim data-trim-whitespace data-line-numbers>
+function ReconDecision() {
+	const [friendInside, setFriendInside] = useState(true)
+	const [strangerAtHerLaptop, setStrangerAtLaptop] = useState(true)
+
+	if (
+		friendInside &&
+		strangerAtHerLaptop
+	) {}
+}
+					</code></pre>
+					<aside class="notes">За её ноутбуком колдует другой человек…</aside>
+				</section>
+
+				<section data-background-color="#2e2414">
+					<h3>Василиса · useState</h3>
+					<pre><code class="language-js" data-line-numbers="4,9" data-trim data-trim-whitespace data-line-numbers>
+function ReconDecision() {
+	const [friendInside, setFriendInside] = useState(true)
+	const [strangerAtHerLaptop, setStrangerAtLaptop] = useState(true)
+	const [sheIsNotMoving, setNotMoving] = useState(true)
+
+	if (
+		friendInside &&
+		strangerAtHerLaptop &&
+		sheIsNotMoving
+	) {}
+}
+					</code></pre>
+					<aside class="notes">она просто спит лицом в код</aside>
+				</section>
+
+				<section data-background-color="#2e2414">
+					<h3>Василиса · useState</h3>
+					<pre><code class="language-js" data-line-numbers="5" data-trim data-trim-whitespace data-line-numbers>
+function ReconDecision() {
+	const [friendInside, setFriendInside] = useState(true)
+	const [strangerAtHerLaptop, setStrangerAtLaptop] = useState(true)
+	const [sheIsNotMoving, setNotMoving] = useState(true)
+	const [steamFromCups, setSteam] = useState(true)
+
+	if (
+		friendInside &&
+		strangerAtHerLaptop &&
+		sheIsNotMoving
+	) {}
+}
+					</code></pre>
+					<aside class="notes">ромашковый чай. РОМАШКОВЫЙ.</aside>
+				</section>
+
+				<section data-background-color="#2e2414">
+					<h3>Василиса · useState</h3>
+					<pre><code class="language-js" data-line-numbers="6,12" data-trim data-trim-whitespace data-line-numbers>
+function ReconDecision() {
+	const [friendInside, setFriendInside] = useState(true)
+	const [strangerAtHerLaptop, setStrangerAtLaptop] = useState(true)
+	const [sheIsNotMoving, setNotMoving] = useState(true)
+	const [steamFromCups, setSteam] = useState(true)
+	const [potapSaysCaptured, setPotapSays] = useState(true)
+
+	if (
+		friendInside &&
+		strangerAtHerLaptop &&
+		sheIsNotMoving &&
+		potapSaysCaptured
+	) {}
+}
+					</code></pre>
+					<aside class="notes">«я же говорил!»</aside>
+				</section>
+
+				<section data-background-color="#2e2414">
+					<h3>Василиса · useState</h3>
+					<pre><code class="language-js" data-line-numbers="14" data-trim data-trim-whitespace data-line-numbers>
+function ReconDecision() {
+	const [friendInside, setFriendInside] = useState(true)
+	const [strangerAtHerLaptop, setStrangerAtLaptop] = useState(true)
+	const [sheIsNotMoving, setNotMoving] = useState(true)
+	const [steamFromCups, setSteam] = useState(true)
+	const [potapSaysCaptured, setPotapSays] = useState(true)
+
+	if (
+		friendInside &&
+		strangerAtHerLaptop &&
+		sheIsNotMoving &&
+		potapSaysCaptured
+	) {
+		return 'KIDNAPPING'
+	}
+
+	return '??'
+}
+					</code></pre>
+					<aside class="notes">Всё ясно — это ПО-ХИ-ЩЕ-НИ-Е!</aside>
+				</section>
+
+				<section data-background-color="#2e2414">
+					<h3>Василиса · useState</h3>
+					<pre><code class="language-js" data-line-numbers="17" data-trim data-trim-whitespace data-line-numbers>
+function ReconDecision() {
+	const [friendInside, setFriendInside] = useState(true)
+	const [strangerAtHerLaptop, setStrangerAtLaptop] = useState(true)
+	const [sheIsNotMoving, setNotMoving] = useState(true)
+	const [steamFromCups, setSteam] = useState(true)
+	const [potapSaysCaptured, setPotapSays] = useState(true)
+
+	if (
+		friendInside &&
+		strangerAtHerLaptop &&
+		sheIsNotMoving &&
+		potapSaysCaptured
+	) {
+		return 'KIDNAPPING'
+	}
+
+	return '??'
+}
+					</code></pre>
+					<aside class="notes">
+						остальные 31 комбинация — загадка <br>
+						Все же понимают, почему комбинаций 32? <br>
+						5 булевых состояний — 2^5 = 32
+					</aside>
+				</section>
+
+				<section data-background-color="#05070c">
+					<aside class="notes">
+						
+					</aside>
+				</section>				
+
+				<!-- 2.5 Митя лезет ближе -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/mitya/mitya-sneaky.png" alt="Митя (sneaky)" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/kuzma/kuzma-chainsaw.png" alt="Кузьма (chainsaw), пилит вдали" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Пока группа совещается, Митя лезет ближе — рассмотреть Кузьму.
+								Тот мирно пилит дрова. Бензопила случайно задевает улей.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Пока группа совещается, Митя лезет ближе — рассмотреть Кузьму. <br>
+						Тот мирно пилит дрова. Бензопила случайно задевает улей.
+					</aside>
+				</section>
+
+				<!-- 2.6 Пчёлы и бег -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/kuzma/kuzma-bees-panic.png" alt="Кузьма (bees-panic)" />
+						<img class="vn__fx vn__fx_bees" style="left: 20%; top: 4%; width: 24%" src="dist/image/object/bees.png" alt="рой пчёл" />
+						<img class="vn__person vn__person_right" src="dist/image/character/mitya/mitya-panic-run.png" alt="Митя (panic-run)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Рой пчёл кружит над Кузьмой — тот машет бензопилой.
+								Митя бежит, не глядя.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Рой пчёл кружит над Кузьмой — тот машет бензопилой. <br>
+						Митя бежит, не глядя.
+					</aside>
+				</section>
+
+				<!-- 2.7 Ветка -->
+				<section data-background-color="#05070c">
+					<img src="dist/image/object/branch.png" alt="ветка" style="display: block; width: 34%; margin: 0 auto 18px;" />
+					<h1 class="fx-title fragment">ВЕТКА.</h1>
+					<p class="fx-sub fragment">Разведка окончена.</p>
+					<aside class="notes">
+						ВЕТКА <br>
+						Разведка окончена.
+					</aside>
+				</section>
+
+				<!-- КОД: Митя, useReducer -->
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="1,3" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	...
+};
+					</code></pre>
+					<aside class="notes">Посморим, что творилось в «голове» у Мити</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="2" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+};
+					</code></pre>
+					<aside class="notes">Итак, он крался, бежал и… встречался с веткой</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="3" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+};
+					</code></pre>
+					<aside class="notes">он видел бензопилу</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="4" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+					</code></pre>
+					<aside class="notes">и он, очевидно, очень нервничал</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="7" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+
+type MityaAction =
+					</code></pre>
+					<aside class="notes">Что происходило?</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="8" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+
+type MityaAction =
+	| { type: 'SEE_CHAINSAW' }
+
+function mityaReducer(state: MityaState, action: MityaAction): MityaState {
+	switch (action.type) {
+		case 'SEE_CHAINSAW':
+			return { ...state, seesChainsaw: true, panicLevel: 10 }
+	}
+}
+					</code></pre>
+					<aside class="notes">Кузьма мирно пилил дрова…</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="12-13" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+
+type MityaAction =
+	| { type: 'SEE_CHAINSAW' }
+
+function mityaReducer(state: MityaState, action: MityaAction): MityaState {
+	switch (action.type) {
+		case 'SEE_CHAINSAW':
+			return { ...state, seesChainsaw: true, panicLevel: 10 }
+
+		default:
+			return state
+	}
+}
+					</code></pre>
+					<aside class="notes">Диспатчим «Увидел бензопилу» → panicLevel: 10</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="9" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+
+type MityaAction =
+	| { type: 'SEE_CHAINSAW' }
+	| { type: 'BEE_STING' }
+
+function mityaReducer(state: MityaState, action: MityaAction): MityaState {
+	switch (action.type) {
+		case 'SEE_CHAINSAW':
+			return { ...state, seesChainsaw: true, panicLevel: 10 }
+
+		default:
+			return state
+	}
+}
+					</code></pre>
+					<aside class="notes">Кузьма задел улей и замахал бензопилой</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="10" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+
+type MityaAction =
+	| { type: 'SEE_CHAINSAW' }
+	| { type: 'BEE_STING' }
+	| { type: 'RUN_AWAY' }
+
+function mityaReducer(state: MityaState, action: MityaAction): MityaState {
+	switch (action.type) {
+		case 'SEE_CHAINSAW':
+			return { ...state, seesChainsaw: true, panicLevel: 10 }
+
+		case 'RUN_AWAY':
+      		return { ...state, position: 'running' }
+
+		default:
+			return state
+	}
+}
+					</code></pre>
+					<aside class="notes">Паника → надо бежать!</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="17-18" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+
+type MityaAction =
+	| { type: 'SEE_CHAINSAW' }
+	| { type: 'BEE_STING' }
+	| { type: 'RUN_AWAY' }
+
+function mityaReducer(state: MityaState, action: MityaAction): MityaState {
+	switch (action.type) {
+		case 'SEE_CHAINSAW':
+			return { ...state, seesChainsaw: true, panicLevel: 10 }
+
+		case 'RUN_AWAY':
+      		return { ...state, position: 'running' }
+
+		default:
+			return state
+	}
+}
+					</code></pre>
+					<aside class="notes">
+						Диспатчим RUN_AWAY → running. Куда? «Куда-нибудь» <br>
+						БАГ: нет guard'а на проверку пути. Редьюсер «окей, бежим» <br>
+      					но он не проверяет предусловий — состояниями он не управляет, только данными
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="11|21-22" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+
+type MityaAction =
+	| { type: 'SEE_CHAINSAW' }
+	| { type: 'BEE_STING' }
+	| { type: 'RUN_AWAY' }
+	| { type: 'LOOK_WHERE_RUNNING' }
+
+function mityaReducer(state: MityaState, action: MityaAction): MityaState {
+	switch (action.type) {
+		case 'SEE_CHAINSAW':
+			return { ...state, seesChainsaw: true, panicLevel: 10 }
+
+		case 'RUN_AWAY':
+      		return { ...state, position: 'running' }
+
+		case 'LOOK_WHERE_RUNNING':
+		    return { ...state, panicLevel: state.panicLevel - 3 }
+
+		default:
+			return state
+	}
+}
+					</code></pre>
+					<aside class="notes">
+						Этот action НИКОГДА не диспатчится при panicLevel > 5: <br>
+						<i>«КЛИК»</i> → некому его отправить — dispatcher сам в панике
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Митя · useReducer — «бежал не глядя»</h3>
+					<pre><code class="language-ts" data-line-numbers="12|25-30" data-trim data-trim-whitespace data-line-numbers>
+type MityaState = {
+	position: 'hiding' | 'running' | 'impaled'
+	seesChainsaw: boolean
+	panicLevel: number
+};
+
+type MityaAction =
+	| { type: 'SEE_CHAINSAW' }
+	| { type: 'BEE_STING' }
+	| { type: 'RUN_AWAY' }
+	| { type: 'LOOK_WHERE_RUNNING' }
+	| { type: 'HIT_OBSTACLE'; obstacle: string }
+
+function mityaReducer(state: MityaState, action: MityaAction): MityaState {
+	switch (action.type) {
+		case 'SEE_CHAINSAW':
+			return { ...state, seesChainsaw: true, panicLevel: 10 }
+
+		case 'RUN_AWAY':
+			return { ...state, position: 'running' }
+
+		case 'LOOK_WHERE_RUNNING':
+			return { ...state, panicLevel: state.panicLevel - 3 }
+
+		case 'HIT_OBSTACLE':
+			if (state.position === 'running') {
+				return { ...state, position: 'impaled' } // 🌿 ветка
+			}
+
+			return state
+
+		default:
+			return state
+	}
+}
+					</code></pre>
+					<aside class="notes">
+						И в конце — встречаем препятствие → «импалемся» на ветку <br>
+						<i>«КЛИК»</i> Фатально: переход без guard. Редьюсер описывает ДАННЫЕ, а не ПУТИ <br>
+						Недостижимых состояний нет… потому что достижимо ВСЁ
+					</aside>
+				</section>
+
+				<section data-background-color="#05070c">
+					<br><br><br><br><br>
+					<h1 class="fx-title fragment">8.</h1>
+					<aside class="notes">
+						Девять джунов на хакатоне — <br />
+						Жара, совсем не осень. <br />
+						Митя в разведку бежал, не глядя, — <br />
+						И студентиков стало восемь.
+					</aside>
+				</section>
+
+				<!-- ============ КАСКАД. «ОПЕРАЦИЯ "ОСВОБОЖДЕНИЕ"» ============ -->
+
+				<!-- 3.1 Толя идёт -->
+				<section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/tolya/tolya-init.png" alt="Толя (init)" />
+						<img class="vn__person vn__person_right " src="dist/image/character/prokhor/prokhor-shovel.png" alt="Прохор (shovel), копает спиной" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Прохор копает яму — сажает картошку.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Тем временем Прохор отправляется на огород — копать картошку.<br>
+						Толя за его спиной.
+					</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/tolya/tolya-determined.png" alt="Толя (determined), копьё" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/prokhor/prokhor-shovel.png" alt="Прохор (shovel), копает спиной" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Толя идёт в атаку со своим копьём. Фича, летящая в прод без тестов.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Толя стремглав устремился на Прохора, но тот в последний момент делает шаг в сторону и…</aside>
+				</section>
+
+				<!-- КОД: Толя, Redux -->
+				<section data-background-color="#101418">
+					<h3>Толя · Redux — «атаковал пустое место»</h3>
+					<pre><code class="language-js" data-line-numbers="3" data-trim data-trim-whitespace data-line-numbers>
+function tolyaReducer(state, action) {
+  switch (action.type) {
+    ...
+
+    default:
+      return state
+  }
+}
+					</code></pre>
+					<aside class="notes">Открываем Redux ToolKit…</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Толя · Redux — «атаковал пустое место»</h3>
+					<pre><code class="language-js" data-line-numbers="3-4|11" data-trim data-trim-whitespace data-line-numbers>
+function tolyaReducer(state, action) {
+	switch (action.type) {
+		case PREPARE_WEAPON:
+			return { ...state, hasWeapon: true, weaponType: 'spear' }
+
+    	default:
+      		return state
+  }
+}
+
+dispatch(PREPARE_WEAPON)
+   
+					</code></pre>
+					<aside class="notes">Готовим копьё</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Толя · Redux — «атаковал пустое место»</h3>
+					<pre><code class="language-js" data-line-numbers="6-7|15" data-trim data-trim-whitespace data-line-numbers>
+function tolyaReducer(state, action) {
+	switch (action.type) {
+		case PREPARE_WEAPON:
+			return { ...state, hasWeapon: true, weaponType: 'spear' }
+
+		case APPROACH_TARGET:
+			return { ...state, isApproaching: true, targetPosition: action.payload }
+
+    	default:
+      		return state
+  }
+}
+
+dispatch(PREPARE_WEAPON)
+dispatch(APPROACH_TARGET)    // targetPosition: {x: 5, y: 0}
+   
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Находим цель,</li>
+							<li>начинаем движение…</li>
+						</ol>
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Толя · Redux — «атаковал пустое место»</h3>
+					<pre><code class="language-js" data-line-numbers="16" data-trim data-trim-whitespace data-line-numbers>
+function tolyaReducer(state, action) {
+	switch (action.type) {
+		case PREPARE_WEAPON:
+			return { ...state, hasWeapon: true, weaponType: 'spear' }
+
+		case APPROACH_TARGET:
+			return { ...state, isApproaching: true, targetPosition: action.payload }
+
+    	default:
+      		return state
+  }
+}
+
+dispatch(PREPARE_WEAPON)
+dispatch(APPROACH_TARGET)    // targetPosition: {x: 5, y: 0}
+// … Прохор наклонился за картошкой …
+   
+					</code></pre>
+					<aside class="notes">асинхронное событие</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Толя · Redux — «атаковал пустое место»</h3>
+					<pre><code class="language-js" data-line-numbers="9-10|20" data-trim data-trim-whitespace data-line-numbers>
+function tolyaReducer(state, action) {
+	switch (action.type) {
+		case PREPARE_WEAPON:
+			return { ...state, hasWeapon: true, weaponType: 'spear' }
+
+		case APPROACH_TARGET:
+			return { ...state, isApproaching: true, targetPosition: action.payload }
+
+		case ATTACK:
+      		return { ...state, isAttacking: true };
+
+    	default:
+      		return state
+  }
+}
+
+dispatch(PREPARE_WEAPON)
+dispatch(APPROACH_TARGET)    // targetPosition: {x: 5, y: 0}
+// … Прохор наклонился за картошкой …
+dispatch(ATTACK)             // атака по {x: 5, y: 0} — там уже никого
+   
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Атакуем</li>
+							<li>
+								Но тут БАГ: нет проверки актуальности координат.<br>
+								В момент диспатча цель могла уже сместиться
+							</li>
+						</ol>
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Толя · Redux — «атаковал пустое место»</h3>
+					<pre><code class="language-js" data-line-numbers="12-13|24" data-trim data-trim-whitespace data-line-numbers>
+function tolyaReducer(state, action) {
+	switch (action.type) {
+		case PREPARE_WEAPON:
+			return { ...state, hasWeapon: true, weaponType: 'spear' }
+
+		case APPROACH_TARGET:
+			return { ...state, isApproaching: true, targetPosition: action.payload }
+
+		case ATTACK:
+      		return { ...state, isAttacking: true };
+
+		case TARGET_MOVES:
+			return { ...state, targetPosition: action.payload };
+
+    	default:
+      		return state
+  }
+}
+
+dispatch(PREPARE_WEAPON)
+dispatch(APPROACH_TARGET)    // targetPosition: {x: 5, y: 0}
+// … Прохор наклонился за картошкой …
+dispatch(ATTACK)             // атака по {x: 5, y: 0} — там уже никого
+dispatch(TARGET_MOVES)       // поздно: isAttacking: true
+   
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>У нас есть экшен обновления координат…</li>
+							<li>
+								Но они прилетают ПОСЛЕ dispatch(ATTACK) — координаты обновились,<br />
+								но isAttacking уже true. Стор не знает, что атака устарела<br />
+								Итог: бросок в пустое место, спотыкается о собственное копьё<br />
+								Гонка асинхронных диспатчей.<br />
+								Как спас бы Redux: RTK Query / listener middleware с requestId — устаревшие ответы отбрасываются на уровне экшенов.
+							</li>
+						</ol>
+					</aside>
+				</section>
+
+				<!-- 3.2 Итог Толи -->
+				<section data-background-color="#05070c">
+					<br><br><br><br>
+					<h1 class="fx-title">СВОЁ КОПЬЁ.</h1>
+					<p class="fx-sub">Прохор так и не заметил нападения. Он занят картошкой.</p>
+					<aside class="notes">
+						Восемь решили воевать: <br>
+						Копьё — и нет проблем! <br>
+						Прохор картошку шёл копать — <br>
+						И джу´нов стало семь.
+					</aside>
+				</section>
+
+				<!-- 4.1 Михаил решает -->
+				<section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/kuzma/kuzma-neutral.png" alt="Кузьма (neutral), у дровокола" />
+						<img class="vn__person vn__person_right vn__person_mirror" src="dist/image/character/mikhail/mikhail-determined.png" alt="Михаил (determined)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Михаил</div>
+							<div class="vn__message">
+								Презентация не состоялась. Значит, решаю проблему радикально:
+								Кузьма стоит у дровокола — идеальная цель.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Закладка «презентация так и не начнётся» выстрелила.</aside>
+				</section>
+
+				<section data-background-color="#05070c">
+					<img src="dist/image/character/mikhail/mikhail-tackle.png" alt="ветка" style="display: block; width: 34%; margin: 0 auto 18px;" />
+					<p class="fx-sub fragment">Флаг стейта ≠ отмена операции</p>
+					<aside class="notes"></aside>
+				</section>
+
+				<!-- КОД: Михаил, Zustand -->
+				<section data-background-color="#101418">
+					<h3>Михаил · Zustand — «отмена таймера»</h3>
+					<pre><code class="language-js" data-line-numbers="4" data-trim data-trim-whitespace data-line-numbers>
+import { create } from 'zustand'
+
+const useMikhailStore = create((set, get) => ({
+	...
+}))
+					</code></pre>
+					<aside class="notes">Михаил использовал Zustand… Но что-то пошло не так…</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Михаил · Zustand — «отмена таймера»</h3>
+					<pre><code class="language-ts" data-line-numbers="4|5|6" data-trim data-trim-whitespace data-line-numbers>
+import { create } from 'zustand'
+
+const useMikhailStore = create((set, get) => ({
+	currentAction: 'idle', // 'idle' | 'running' | 'tackling'
+	target: { name: 'Кузьма', position: { x: 10, y: 5 } }, // стоит у дровокола
+	velocity: 0,
+}))
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Мы видели три стадии развития… персонажа…</li>
+							<li>Он ЧЁТКО обозначил цель и её положение</li>
+							<li>И постепенно набирал скорость</li>
+						</ol>
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Михаил · Zustand — «отмена таймера»</h3>
+					<pre><code class="language-ts" data-line-numbers="12-14|8-10" data-trim data-trim-whitespace data-line-numbers>
+import { create } from 'zustand'
+
+const useMikhailStore = create((set, get) => ({
+	currentAction: 'idle', // 'idle' | 'running' | 'tackling'
+	target: { name: 'Кузьма', position: { x: 10, y: 5 } }, // стоит у дровокола
+	velocity: 0,
+
+	executeAttack: () => {
+
+	},
+
+	cancelAttack: () => {
+
+	},
+}))
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Михаил подстраховался возможностью прервать своё действие</li>
+							<li>И детально проработал план нападения…</li>
+						</ol>
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Михаил · Zustand — «отмена таймера»</h3>
+					<pre><code class="language-ts" data-line-numbers="9|10|14-15|16" data-trim data-trim-whitespace data-line-numbers>
+import { create } from 'zustand'
+
+const useMikhailStore = create((set, get) => ({
+	currentAction: 'idle', // 'idle' | 'running' | 'tackling'
+	target: { name: 'Кузьма', position: { x: 10, y: 5 } }, // стоит у дровокола
+	velocity: 0,
+
+	executeAttack: () => {
+		if (get().currentAction !== 'idle') { return }
+		set({ currentAction: 'running', velocity: 5 })
+	},
+
+	cancelAttack: () => {
+		const { currentAction } = get()
+		if (currentAction === 'tackling') { return } // уже поздно
+		set({ currentAction: 'idle', velocity: 0 })
+	},
+}))
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Очевидно, атака не нужна в состоянии покоя</li>
+							<li>Набираем скорость!</li>
+							<li>А для отмены, очевидно, состояние "броска" — уже необратимое</li>
+							<li>Но всё равно сбавляем скорость и переходим в состояние покоя…</li>
+						</ol>
+						Но… чего-то не хватает? Не хватает экшена!
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>Михаил · Zustand — «отмена таймера»</h3>
+					<pre><code class="language-ts" data-line-numbers="33|34|35|12-23|13-14|16|18,22|19-21" data-trim data-trim-whitespace data-line-numbers>
+import { create } from 'zustand'
+
+const useMikhailStore = create((set, get) => ({
+	currentAction: 'idle', // 'idle' | 'running' | 'tackling'
+	target: { name: 'Кузьма', position: { x: 10, y: 5 } }, // стоит у дровокола
+	velocity: 0,
+
+	executeAttack: () => {
+		if (get().currentAction !== 'idle') { return }
+		set({ currentAction: 'running', velocity: 5 })
+
+		setTimeout(() => {
+			const { target } = get()
+			const obstacle = checkForObstacle(target.position)
+
+			set({ currentAction: 'tackling', velocity: 10 }) // точка невозврата
+
+			if (obstacle?.type === 'wood_chipper') {
+				// 💀 Михаил в дровоколе. И да:
+				set({ currentAction: 'idle' })
+				// стейт вернулся в idle. Михаил — нет
+			}
+		}, 500)
+	},
+
+	cancelAttack: () => {
+		const { currentAction } = get()
+		if (currentAction === 'tackling') { return } // уже поздно
+		set({ currentAction: 'idle', velocity: 0 })
+	},
+}))
+
+useMikhailStore.getState().executeAttack()
+// Кузьма отходит от дровокола
+useMikhailStore.getState().cancelAttack()
+   
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Вижу цель — не вижу препятсвий!</li>
+							<li>Кузьма отходит от дровокола -- это асинхронное состояние -- нужно добавить обработчик</li>
+							<li>Отменяем действие!</li>
+							<li>setTimeout — это Асинхронный «рывок». // …500мс… БРОСОК → 💀 дровокол</li>
+							<li>Получаем (obstacle) — препятствия</li>
+							<li>Прыжок! точка невозврата</li>
+							<li>Препятсвием оказывается дровокол, а не Кузьма.</li>
+							<li>💀 Михаил в дровоколе. И да: стейт вернулся в idle. Михаил — нет</li>
+						</ol>
+						Вывод: Флаг стейта ≠ отмена операции.<br>
+						Как спас бы Zustand: сохранить `clearTimeout`/`AbortController` рядом с переходом в `running`
+						и звать его в `cancelAttack`.<br>
+						Или добавить мметод `currentAction` как явная последовательность состояний с веткой отмены.
+					</aside>
+				</section>
+				
+				<section data-background-color="#05070c">
+					<br><br><br><br><br>
+					<h1 class="fx-title fragment">6.</h1>
+					<aside class="notes">
+						Семь джуно´в хотят успеть<br>
+						Спасти подругу — честь!<br>
+						Отмена не спасёт: лететь!<br>
+						И джу´нов стало шесть.
+					</aside>
+				</section>
+				
+				<!-- 5.1 Гурий приезжает -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/cheslav/cheslav-proud.png" alt="Чеслав (proud)" />
+						<img class="vn__person vn__person_right" src="dist/image/character/guriy/guriy-sheriff.png" alt="Гурий (sheriff)" />
+						<div class="vn__dialog">
+						</div>
+					</div>
+					<aside class="notes">
+						Весть о «гибнущей команде» доходит до внешнего мира. Приезжает
+						Гурий — сеньор-QA на пенсии, с Vitest и ковбойской шляпой.
+					</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/cheslav/cheslav-proud.png" alt="Чеслав (proud)" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/guriy/guriy-sheriff.png" alt="Гурий (sheriff)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Чеслав</div>
+							<div class="vn__message">
+								Сейчас я вам покажу свой стек!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Чеслав: Сейчас я вам покажу свой стек!
+					</aside>
+				</section>
+
+				<!-- КОД: Чеслав, терминал Recoil -->
+				<section data-background-color="#0c0c0c">
+					<h3>Чеслав · Recoil</h3>
+					<pre class="fx-stacktrace">$ npm i recoil
+<span class="fragment">+ recoil@0.7.7</span>
+<span class="fragment">added 5 packages in 2s</span>
+<span class="fragment">found 0 vulnerabilities        ← npm молчит: пакет «жив»</span>
+
+<span class="fragment">$ npm run dev</span>
+<span class="fragment">TypeError: ...__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED is undefined
+    at currentRendererSupportsUseSyncExternalStore (index.js:511)
+    at useRecoilValueLoadable (index.js:5353)</span></pre>
+					<br />
+					<br />
+					<h3 class="fragment">«умер на установке зависимостей»</h3>
+					<aside class="notes">
+						<ol>
+							<li>Чеслав открывает терминал, бодро вбивает установку recoil</li>
+							<li>установка прошла успешно</li>
+							<li>зависимости встали как родные</li>
+							<li>никаких предупреждений</li>
+							<li>А если запустить?..</li>
+							<li>
+								TypeError!<br>
+								Факты: репозиторий заархивирован 01 января 2025, последний релиз 01 марта 2023!<br>
+								deprecation-флага нет, сайт жив.
+							</li>
+							<li>Чеслав умер раньше рантайма.</li>
+						</ol>
+					</aside>
+				</section>
+
+				<!-- 5.2 Гурий: всё зелёное -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_right" src="dist/image/character/guriy/guriy-smug.png" alt="Гурий (smug)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Гурий</div>
+							<div class="vn__message">
+								У меня всё зелёное. Вы всё выдумали.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">У Гурия все тесты зёленые? Куда закралась ошибка? Он тоже заглядывает в окно…</aside>
+				</section>
+
+				<!-- КОД: Гурий, красный тест -->
+				<section data-background-color="#101418">
+					<h3>Гурий · QA — guiry.repro.test.ts</h3>
+					<pre><code class="language-ts" data-line-numbers="3|5-6,17-18|8|9|10|11|12|15-16" data-trim data-trim-whitespace data-line-numbers>
+import { describe, it, expect, vi } from 'vitest';
+
+vi.useFakeTimers(); // настоящие 2 секунды наблюдения — не для юнит-тестов
+
+describe('KIDNAPPING verdict', () => {
+  it('воспроизводится локально', () => {
+    const window = mockWindow({
+      friendInside: true,
+      strangerAtHerLaptop: true,
+      sheIsNotMoving: true,
+      steamFromCups: true,      // в моке данные ПОЛНЫЕ — контекст на месте
+      potapSaysCaptured: false, // и Потап в «песочнице» не мутирует контекст
+    });
+
+    const verdict = reconDecision(window);
+    expect(verdict).toBe('KIDNAPPING'); // → ❌ КРАСНЫЙ: received 'SAFE'
+  });
+});
+					</code></pre>
+					<aside class="notes">
+						
+						<ol>
+							<li>ставим эмуляцию таймера. настоящие 2 секунды наблюдения — не для юнит-тестов</li>
+							<li>— «сейчас я ваш KIDNAPPING воспроизведу»</li>
+							<li>Алиса в доме</li>
+							<li>Потап чинит её ноутбук</li>
+							<li>Она спит лицом в клавиатуру</li>
+							<li>И чай на месте</li>
+							<li>Но утверждение Потапа не прилетает раньше взгляда в окно</li>
+							<li>Вывод — никакого похищения!</li>
+						</ol>
+					</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_right" src="dist/image/character/guriy/guriy-smug.png" alt="Гурий (smug)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Гурий</div>
+							<div class="vn__message">
+								В «песочнице» не воспроизводится. Придётся лезть на прод…
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Гурий: В «песочнице» не воспроизводится. Придётся лезть на прод…<br>
+						Направляется дом…
+					</aside>
+				</section>
+
+				<!-- 5.3 Балка = stack trace -->
+				<section data-background-color="#1a0505">
+					<pre class="fx-stacktrace">Error: KIDNAPPING is not a bug
+    at production (everyone/is-dying.js:42)
+    at Sheriff.inspect (prod-state.js:511)
+    ────────────────────────────────────
+    stack trace падает Гурию на голову</pre>
+					<aside class="notes">
+						К сожалению, тестирование не спасает от неверной модели.<br>
+						Спас бы: интеграционный тест с реальным порядком событий
+					</aside>
+				</section>
+
+				<section data-background-color="#05070c">
+					<br><br><br><br><br>
+					<h1 class="fx-title fragment">5.</h1>
+					<aside class="notes">
+						Шестеро верили в пакет — <br>
+						Реестр молчит опять. <br>
+						Чеслав доверился — но нет, <br>
+						И джунов стало пять.
+					</aside>
+				</section>
+
+				<!-- 6.1 Огонь: Потап и Яша -->
+				<section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/potap/potap-burner.png" alt="Потап (burner)" />
+						<img class="vn__person vn__person_right" src="dist/image/character/yasha/yasha-on-fire.png" alt="Яша (on-fire)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Потап, доведённый до ручки, неудачно махнул горелкой. Загорается Яша.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Потап, доведённый до ручки, неудачно махнул горелкой. Загорается Яша.</aside>
+				</section>
+
+				<!-- КОД: Яша, MobX -->
+				<section data-background-color="#101418">
+					<h3>Яша · MobX — «каскад без стоп-крана»</h3>
+					<pre><code class="language-js" data-line-numbers="|4|5|6|9|36|37|31-33|11-14|16-19|27-29|21-24|27-29" data-trim data-trim-whitespace data-line-numbers>
+import { makeAutoObservable, reaction } from 'mobx'
+
+class YashaState {
+	isOnFire = false
+	painLevel = 0
+	position = { x: 5, y: 5 }
+
+	constructor() {
+		makeAutoObservable(this)
+
+		reaction(
+			() => this.isOnFire,
+			(onFire) => { if (onFire) this.painLevel = 10 }
+		)
+
+		reaction(
+			() => this.painLevel,
+			(pain) => { if (pain > 7) this.runRandomly() }
+		)
+
+		reaction(
+			() => this.position,
+			() => this.runRandomly() // «ещё одна паника, накладывается»
+		)
+	}
+
+	runRandomly() {
+		this.position = { x: Math.random() * 10, y: Math.random() * 10 }
+	}
+
+	catchFire() {
+		this.isOnFire = true
+	}
+}
+
+const yasha = new YashaState()
+yasha.catchFire()
+   
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Создаём класс состояния Яши</li>
+							<li>не в огне</li>
+							<li>всё в порядке</li>
+							<li>стоит на месте</li>
+							<li>У MobX реактивная и мутабельная структура данных, makeAutoObservable позволяет отслеживать изменения без явных подписок</li>
+							<li>Инициируем инстанс класса</li>
+							<li>Поджигаем Яшу</li>
+							<li>Это мутирует его состояние</li>
+							<li>на которое подписана… ПЕРВАЯ реакция: огонь → боль</li>
+							<li>Реакция 2: боль → хаотичный бег</li>
+							<li>Реакция 3: бег → новое положение → см. реакцию 3</li>
+							<li>реакция 3 замкнула петлю: бесконечный каскад</li>
+						</ol>
+
+						Как спас бы MobX: сохранить disposer'ы (`this.disposers = [...]`) и вызывать при выходе из паники; `reaction` с `equals`-компаратором.
+					</aside>
+				</section>
+
+				<section data-background-color="#05070c">
+					<br><br><br><br><br>
+					<h1 class="fx-title fragment">4.</h1>
+					<aside class="notes">
+						Пятеро сели у костра — <br>
+						Потап махнул всё шире — <br>
+						И Яша вспыхнул до утра, <br>
+						И стало их четыре.
+					</aside>
+				</section>
+
+				<!-- 6.2 Василиса и канистра -->
+				<section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/yasha/yasha-on-fire.png" alt="Яша (on-fire)" />
+						<img class="vn__person vn__person_right" src="dist/image/character/vasilisa/vasilisa-horror.png" alt="Василиса (horror), канистра" />
+						<div class="vn__dialog">
+							<div class="vn__name">Василиса</div>
+							<div class="vn__message vn__message_thought">
+								Не буду мудрить — хватаю ближайшую канистру…
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Василиса спешит на помощь Яше.
+					</aside>
+				</section>
+
+				<!-- КОД: Василиса, огонь -->
+				<section data-background-color="#101418">
+					<h3>Василиса · useState — «бросок до идентификации»</h3>
+					<pre><code class="language-js" data-line-numbers="|2-3|5,17|6|8|9|11,14|12|13|16" data-trim data-trim-whitespace data-line-numbers>
+function FireResponse({ canisters }) {
+  const [canister, setCanister] = useState(null)
+  const [jasonOnFire, setJasonOnFire] = useState(false)
+
+  useEffect(() => {
+    if (!jasonOnFire) { return }
+
+    setCanister(canisters.nearest)
+    throwLiquid(canisters.nearest)
+
+    const id = setTimeout(() => {
+      const identified = identifyLiquid(canisters.nearest)
+      setCanister(identified) // 'accelerant' 🙃
+    }, 400)
+
+    return () => clearTimeout(id)
+  }, [jasonOnFire]);
+}
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Василиса верна ванильному Реакту</li>
+							<li>Объявляем 2 хранилища</li>
+							<li>Она видит, что её друг попал в непростую ситуацию</li>
+							<li>
+								Он определенно горит<br>
+								Рядом канистры: вода и ускоритель. Выглядят одинаково. Это важно
+							</li>
+							<li>Василиса очень решительна: «Не буду мудрить: хватаю ближайшую…»</li>
+							<li>→ «…и БРОСАЮ. Сразу»</li>
+							<li>setTimeout → Проверка — постфактум. Ответ придёт через 400мс после броска</li>
+							<li>Пока канистра летит, приходит осознание</li>
+							<li> → Оба вспыхивают. Идентификация завершена успешно</li>
+							<li>
+								cleanup есть, но поздно: он отменит таймер только при размонтировании — не бросок
+								<p>БАГ в том, что действие выполнено ДО завершения асинхронной проверки.<br>
+								Классика useState: порядок операций живёт в голове, а не в стейте</p>
+								<p>Как спас бы useState: один флаг-этап `phase: 'идентификация' | 'готовоКБроску'` вместо
+								двух независимых состояний — и `бросокКанистры` физически недостижим до `'готовоКБроску'`.</p>
+							</li>
+						</ol>
+					</aside>
+				</section>
+
+				<section data-background-color="#05070c">
+					<br><br><br><br><br>
+					<h1 class="fx-title fragment">3.</h1>
+					<aside class="notes">
+						Четверо бросились тушить — <br>
+						Вода? Сперва — смотри! <br>
+						Но Василиса стала лить, <br>
+						И джунов стало три.
+					</aside>
+				</section>
+
+				<!-- 7.1 Нина -->
+				<section class="vn" data-background-image="dist/image/background/lake-evening.png" data-background-color="#1d1633">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/nina/nina-frozen.png" alt="Нина (frozen)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Нину находят у кромки воды. Она сидит неподвижно и смотрит
+								в одну точку. Губы шевелятся: «друзья… захват… друзья… захват…»
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Нину нашли «зависшей» — тихий вечный пересчёт.
+					</aside>
+				</section>
+
+				<!-- КОД: Нина, Jotai -->
+				<section data-background-color="#101418">
+					<h3>Нина · Jotai — «зациклилась»</h3>
+					<pre><code class="language-js" data-line-numbers="|3|5-7|17-18|9-15|10|11-12,14|13|19" data-trim data-trim-whitespace data-line-numbers>
+import { atom, createStore } from 'jotai/vanilla'
+
+const potapOpinionAtom = atom('друзья') // что сейчас сказал Потап
+
+const threatLevelAtom = atom((get) =>
+  get(potapOpinionAtom) === 'захват!' ? 100 : 0
+)
+
+const reevaluateAtom = atom(null, (get, set) => {
+  const level = get(threatLevelAtom) // get в write — нетрекинг, это ок
+  set(
+    potapOpinionAtom,
+    level > 50 ? 'друзья' : 'захват!' // …и мнение снова меняет угрозу
+  )
+})
+
+const store = createStore()
+store.sub(threatLevelAtom, () => store.set(reevaluateAtom))
+store.set(potapOpinionAtom, 'захват!')
+   
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li></li>
+							<li>Нина свела всё к атомам: и мнение Потапа…</li>
+							<li>…и уровень угрозы</li>
+							<li>store.sub → подписка: угроза пересчиталась → переоцениваем мнение</li>
+							<li>reevaluateAtom → «переоценка»:</li>
+							<li>при изменении угрозы</li>
+							<li>— переслушать Потапа</li>
+							<li>'захват!' → угроза 100 → переоценка → 'друзья' → угроза 0 → 'захват!' → …</li>
+							<li>
+								store.set зовёт подписчиков СИНХРОННО. Цикл вечный, ошибок нет.
+								<p>Нина не отвечает. Вкладка не отвечает. Всё зависло — тихо</p>
+								<p>Проверено на `jotai@3.0.1`: цикл через подписку — синхронный, без ошибки, вкладка замирает.</p>
+								Как спас бы Jotai: ациклический граф — одно направление мнений; или `store.sub` с проверкой «действительно ли изменилось значение?» перед `set`.
+							</li>
+						</ol>
+					</aside>
+				</section>
+
+				<section data-background-color="#05070c">
+					<br><br><br><br><br>
+					<h1 class="fx-title fragment">2</h1>
+					<aside class="notes">
+						Трое гадали: враг иль нет, <br>
+						Гадали по словам. <br>
+						И тишина была ответ — <br>
+						И джунов стало два.
+					</aside>
+				</section>
+
+				<!-- 8.1 Флешбек Потапа -->
+				<section class="vn" data-background-image="dist/image/background/terminal-red.png" data-background-color="#200a0a">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_right" src="dist/image/character/potap/potap-dark.png" alt="Потап (dark), силуэт" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Пока команда гибнет, Потап вспоминает: отец… ночь… легаси
+								на jQuery и БЭМ… красное окно сборки… сгоревший дедлайн…
+								тишина в доме…
+							</div>
+						</div>
+					</div>
+					<aside class="notes">
+						Пока команда гибнет, Потап вспоминает:
+						<ul>
+							<li>отец…</li>
+							<li>ночь…</li>
+							<li>легаси на jQuery и БЭМ…</li>
+							<li>красное окно сборки…</li>
+							<li>сгоревший дедлайн…</li>
+							<li>тишина в доме…</li>
+						</ul>
+					</aside>
+				</section>
+
+				<!-- 8.2 Клятва Потапа -->
+				<section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_right" src="dist/image/character/potap/potap-commanding.png" alt="Потап (commanding)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Потап</div>
+							<div class="vn__message">
+								Они все такие. Старая школа. Она забирает лучших.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Потап в ярости: Они все такие! Старая школа! Она забирает лучших!</aside>
+				</section>
+
+				<!-- ============ ФИНАЛ. «РОМАШКОВЫЙ ЧАЙ» ============ -->
+
+				<!-- 9.1 Потап идёт с горелкой -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/potap/potap-burner.png" alt="Потап (burner)" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/kuzma/kuzma-neutral.png" alt="Кузьма (neutral)" />
+						<img style="right: 16%;" class="vn__person vn__person_right vn__person_mirror vn__person_inactive" src="dist/image/character/prokhor/prokhor-neutral.png" alt="Прохор (neutral)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Потап — последний из команды — идёт на Кузьму
+								и Прохора с горелкой.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Кульминация у дома. Потап — последний из команды — идёт на Кузьму
+								и Прохора с горелкой.</aside>
+				</section>
+
+				<!-- 9.2 Бросок чая -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/potap/potap-burner.png" alt="Потап (burner)" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/kuzma/kuzma-neutral.png" alt="Кузьма (neutral)" />
+						<img style="right: 16%;" class="vn__person vn__person_right" src="dist/image/character/prokhor/prokhor-throw.png" alt="Прохор (throw)" />
+						<img class="vn__fx" style="left: 44%; top: 36%; width: 14%" src="dist/image/object/tea.png" alt="коробка чая в полёте" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Прохор, не глядя, бросает в него первое, что попадает под руку.
+								Коробку ромашкового чая.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Прохор, не глядя, бросает в него первое, что попадает под руку.
+								Коробку ромашкового чая.</aside>
+				</section>
+
+				<!-- 9.3 Аллергия -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/potap/potap-choking.png" alt="Потап (choking)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								У Потапа аллергия на ромашку. И астма. Ингалятор — в куртке,
+								оставшейся у дровокола.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">У Потапа аллергия на ромашку. И астма. Ингалятор — в куртке,
+								оставшейся у дровокола.</aside>
+				</section>
+
+				<!-- КОД: Потап, Effector -->
+				<section data-background-color="#101418">
+					<h3>Потап · Effector — «коллапс сети»</h3>
+					<pre><code class="language-js" data-line-numbers="|3|4|5|6|7|24|9-10|24|12-14|25|26-27|16|26-27|28|17|28|29|19-22|30|31" data-trim data-trim-whitespace data-line-numbers>
+import { createStore, createEvent, sample, combine } from 'effector'
+
+const allergenDetected = createEvent() // Прохор бросает коробку чая
+const breathingDifficulty = createEvent()
+const needsInhaler = createEvent()
+const inhalerNotFound = createEvent()
+const panicIntensifies = createEvent()
+
+const $allergenExposure = createStore(0)
+  .on(allergenDetected, (s) => s + 100) // ромашка × аллергия
+
+const $breathingCapacity = createStore(100)
+  .on(breathingDifficulty, (s) => s - 30)
+  .on($allergenExposure, (s, exposure) => s - exposure) // стор на стор — валидно
+
+const $hasInhaler = createStore(false) // ингалятор в другой куртке
+const $panicLevel = createStore(5).on(panicIntensifies, (s) => s + 20)
+
+const $canBreathe = combine(
+  $breathingCapacity, $panicLevel,
+  (capacity, panic) => capacity - panic > 0
+)
+
+sample({ clock: allergenDetected, target: breathingDifficulty })
+sample({ clock: breathingDifficulty, target: needsInhaler })
+sample({ clock: needsInhaler, source: $hasInhaler,
+         filter: (has) => !has, target: inhalerNotFound })
+sample({ clock: inhalerNotFound, target: panicIntensifies })
+sample({ clock: panicIntensifies, source: $canBreathe,
+         filter: (can) => !can,
+         fn: () => console.log('💀 Потап падает из окна') })
+     
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>Создаём необходимые сторы:</li>
+							<li>allergenDetected → поймали аллерген,</li>
+							<li>breathingDifficulty → дыхание затруднено,</li>
+							<li>needsInhaler → нужен ингалятор</li>
+							<li>inhalerNotFound → ингалятора нет,</li>
+							<li>panicIntensifies → паника усиливается</li>
+							<li>Запускаем исполнение… <br>
+							    sample смотрит на allergenDetected,</li>
+							<li>который в createStore возвращает allergenExposure 100</li>
+							<li>sample из allergenDetected «таргетирует» в breathingDifficulty</li>
+							<li>который в свою очередь через createStore возвращает capacity 0</li>
+							<li>следующий sample: дыхание затруднено, нужен ингалятор</li>
+							<li>следующий sample: ищем ингалятор…</li>
+							<li>ингалятор в другой куртке</li>
+							<li>нет ингалятора —</li>
+							<li>— паника усиливается (panic 25)</li>
+							<li>паника усиливается (canBreathe false)</li>
+						</ol>
+
+						Граф из 6 узлов и 5 sample. Забыл один — цепь рвётся.<br>
+						Никто не виноват: ни один узел не знает про остальных<br>
+						Спас бы: один derived-стор вместо цепочки					
+					</aside>
+				</section>
+
+				<!-- 9.4 Одна машина — два исхода -->
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/alisa/alisa-tea.png" alt="Алиса (tea), спокойно пьёт" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/potap/potap-choking.png" alt="Потап (choking)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Одна и та же ситуация, но разный контекст — Алиса спокойно пьёт чай.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Тем временем Алиса спокойно пьёт чай. Алиса использовала xState</aside>
+				</section>
+
+				<!-- КОД: XState-финал -->
+				<section data-background-color="#101418">
+					<h3>XState v5 — «одна машина, два исхода»</h3>
+					<pre><code class="language-ts" data-line-numbers="|5-10|6|7|8|9|12-17|13-14|15|16|18-22|19-21|23-29|25|26|27|28|30|32-39|34|35" data-trim data-trim-whitespace data-line-numbers>
+						import { setup, assign } from 'xstate'
+
+						const allergyResponseMachine = setup({
+							types: {
+								context: {} as {
+									allergen: string | null
+									isAllergic: boolean   // ← различие персонажей живёт в контексте
+									breathingCapacity: number
+									hasInhaler: boolean
+								},
+							},
+							guards: {
+								hasAllergy: ({ context }) =>
+									context.isAllergic && context.allergen === 'chamomile',
+								canStillBreathe: ({ context }) => context.breathingCapacity > 20,
+								hasInhaler: ({ context }) => context.hasInhaler,
+							},
+							actions: {
+								reduceBreathing: assign({
+									breathingCapacity: ({ context }) => context.breathingCapacity - 30,
+								}),
+							},
+						}).createMachine({
+							context: {
+								allergen: null,
+								isAllergic: true, // Потап: true, Алиса: false,
+								breathingCapacity: 100,
+								hasInhaler: false,
+							},
+							initial: 'normal',
+							states: {
+								normal: {
+									on: {
+										SUBSTANCE_THROWN: { // коробка чая летит в лицо
+											actions: assign({ allergen: ({ event }) => event.substance }),
+											target: 'checkingAllergy',
+										},
+									},
+								},
+								checkingAllergy: {
+									always: [
+										{ guard: 'hasAllergy', target: 'allergicReaction' },
+										{ target: 'normal' }, // Алиса спокойно пьёт чай
+									],
+								},
+								allergicReaction: {
+									entry: 'reduceBreathing',
+									always: [
+										{ guard: 'canStillBreathe', target: 'seekingInhaler' },
+										{ target: 'criticalCondition' },
+									],
+								},
+								seekingInhaler: {
+									always: [
+										{ guard: 'hasInhaler', target: 'recovering' },
+										{ target: 'criticalCondition' }, // ингалятор не найден
+									],
+								},
+								recovering: { after: { 2000: 'normal' } },
+								criticalCondition: { type: 'final' },
+							},
+						})
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>сначала делаем небольшой сетап</li>
+							<li>описываем типы</li>
+							<li>аллерген, наличие аллергии (различие персонажей живёт в контексте), текущее состояние и наличие ингалаятора</li>
+							<li>Проверки. Проверки опираются на значения контекста</li>
+							<li>Наличие аллергии?, персонаж ещё дышит?, а у нас есть ингалятор?</li>
+							<li>И мутации стейта (которые тоже не заависят от состояний)</li>
+							<li>В нашем случае — последствие воздействия аллергии</li>
+							<li>Создаём машину…</li>
+							<li>аллерген пока не определён, У Потапа есть аллергия, дыхание в норме, но нет ингалаятора</li>
+							<li>начальное состояние… поехали!</li>
+							<li></li>
+						</ol>
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>XState v5 — «одна машина, два исхода»</h3>
+					<pre><code class="language-ts" data-line-numbers="25|36|40-45|42|13-14|25-26|13-14|42|46-52|47|19-21" data-trim data-trim-whitespace data-line-numbers>
+						import { setup, assign } from 'xstate'
+
+						const allergyResponseMachine = setup({
+							types: {
+								context: {} as {
+									allergen: string | null
+									isAllergic: boolean   // ← различие персонажей живёт в контексте
+									breathingCapacity: number
+									hasInhaler: boolean
+								},
+							},
+							guards: {
+								hasAllergy: ({ context }) =>
+									context.isAllergic && context.allergen === 'chamomile',
+								canStillBreathe: ({ context }) => context.breathingCapacity > 20,
+								hasInhaler: ({ context }) => context.hasInhaler,
+							},
+							actions: {
+								reduceBreathing: assign({
+									breathingCapacity: ({ context }) => context.breathingCapacity - 30,
+								}),
+							},
+						}).createMachine({
+							context: {
+								allergen: 'chamomile',
+								isAllergic: true, // Потап: true, Алиса: false,
+								breathingCapacity: 100,
+								hasInhaler: false,
+							},
+							initial: 'normal',
+							states: {
+								normal: {
+									on: {
+										SUBSTANCE_THROWN: { // коробка чая летит в лицо
+											actions: assign({ allergen: ({ event }) => event.substance }),
+											target: 'checkingAllergy',
+										},
+									},
+								},
+								checkingAllergy: {
+									always: [
+										{ guard: 'hasAllergy', target: 'allergicReaction' },
+										{ target: 'normal' }, // Алиса спокойно пьёт чай
+									],
+								},
+								allergicReaction: {
+									entry: 'reduceBreathing',
+									always: [
+										{ guard: 'canStillBreathe', target: 'seekingInhaler' },
+										{ target: 'criticalCondition' },
+									],
+								},
+								seekingInhaler: {
+									always: [
+										{ guard: 'hasInhaler', target: 'recovering' },
+										{ target: 'criticalCondition' }, // ингалятор не найден
+									],
+								},
+								recovering: { after: { 2000: 'normal' } },
+								criticalCondition: { type: 'final' },
+							},
+						})
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>сначала делаем небольшой сетап</li>
+							<li>описываем типы</li>
+							<li>аллерген, наличие аллергии (различие персонажей живёт в контексте), текущее состояние и наличие ингалаятора</li>
+							<li>Проверки. Проверки опираются на значения контекста</li>
+							<li>Наличие аллергии?, персонаж ещё дышит?, а у нас есть ингалятор?</li>
+							<li>И мутации стейта (которые тоже не заависят от состояний)</li>
+							<li>В нашем случае — последствие воздействия аллергии</li>
+							<li>Создаём машину…</li>
+							<li>аллерген пока не определён, У Потапа есть аллергия, дыхание в норме, но нет ингалаятора</li>
+							<li>начальное состояние… поехали!</li>
+							<li></li>
+						</ol>
+					</aside>
+				</section>
+				
+				<section data-background-color="#101418">
+					<h3>XState v5 — «одна машина, два исхода»</h3>
+					<pre><code class="language-ts" data-line-numbers="27" data-trim data-trim-whitespace data-line-numbers>
+						import { setup, assign } from 'xstate'
+
+						const allergyResponseMachine = setup({
+							types: {
+								context: {} as {
+									allergen: string | null
+									isAllergic: boolean   // ← различие персонажей живёт в контексте
+									breathingCapacity: number
+									hasInhaler: boolean
+								},
+							},
+							guards: {
+								hasAllergy: ({ context }) =>
+									context.isAllergic && context.allergen === 'chamomile',
+								canStillBreathe: ({ context }) => context.breathingCapacity > 20,
+								hasInhaler: ({ context }) => context.hasInhaler,
+							},
+							actions: {
+								reduceBreathing: assign({
+									breathingCapacity: ({ context }) => context.breathingCapacity - 30,
+								}),
+							},
+						}).createMachine({
+							context: {
+								allergen: 'chamomile',
+								isAllergic: true, // Потап: true, Алиса: false,
+								breathingCapacity: 100 - 30,
+								hasInhaler: false,
+							},
+							initial: 'normal',
+							states: {
+								normal: {
+									on: {
+										SUBSTANCE_THROWN: { // коробка чая летит в лицо
+											actions: assign({ allergen: ({ event }) => event.substance }),
+											target: 'checkingAllergy',
+										},
+									},
+								},
+								checkingAllergy: {
+									always: [
+										{ guard: 'hasAllergy', target: 'allergicReaction' },
+										{ target: 'normal' }, // Алиса спокойно пьёт чай
+									],
+								},
+								allergicReaction: {
+									entry: 'reduceBreathing',
+									always: [
+										{ guard: 'canStillBreathe', target: 'seekingInhaler' },
+										{ target: 'criticalCondition' },
+									],
+								},
+								seekingInhaler: {
+									always: [
+										{ guard: 'hasInhaler', target: 'recovering' },
+										{ target: 'criticalCondition' }, // ингалятор не найден
+									],
+								},
+								recovering: { after: { 2000: 'normal' } },
+								criticalCondition: { type: 'final' },
+							},
+						})
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>сначала делаем небольшой сетап</li>
+							<li>описываем типы</li>
+							<li>аллерген, наличие аллергии (различие персонажей живёт в контексте), текущее состояние и наличие ингалаятора</li>
+							<li>Проверки. Проверки опираются на значения контекста</li>
+							<li>Наличие аллергии?, персонаж ещё дышит?, а у нас есть ингалятор?</li>
+							<li>И мутации стейта (которые тоже не заависят от состояний)</li>
+							<li>В нашем случае — последствие воздействия аллергии</li>
+							<li>Создаём машину…</li>
+							<li>аллерген пока не определён, У Потапа есть аллергия, дыхание в норме, но нет ингалаятора</li>
+							<li>начальное состояние… поехали!</li>
+							<li></li>
+						</ol>
+					</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>XState v5 — «одна машина, два исхода»</h3>
+					<pre><code class="language-ts" data-line-numbers="27|48-51|49|15|49|53-58|55|16|28|49|50|60" data-trim data-trim-whitespace data-line-numbers>
+						import { setup, assign } from 'xstate'
+
+						const allergyResponseMachine = setup({
+							types: {
+								context: {} as {
+									allergen: string | null
+									isAllergic: boolean   // ← различие персонажей живёт в контексте
+									breathingCapacity: number
+									hasInhaler: boolean
+								},
+							},
+							guards: {
+								hasAllergy: ({ context }) =>
+									context.isAllergic && context.allergen === 'chamomile',
+								canStillBreathe: ({ context }) => context.breathingCapacity > 20,
+								hasInhaler: ({ context }) => context.hasInhaler,
+							},
+							actions: {
+								reduceBreathing: assign({
+									breathingCapacity: ({ context }) => context.breathingCapacity - 30,
+								}),
+							},
+						}).createMachine({
+							context: {
+								allergen: 'chamomile',
+								isAllergic: true, // Потап: true, Алиса: false,
+								breathingCapacity: 70,
+								hasInhaler: false,
+							},
+							initial: 'normal',
+							states: {
+								normal: {
+									on: {
+										SUBSTANCE_THROWN: { // коробка чая летит в лицо
+											actions: assign({ allergen: ({ event }) => event.substance }),
+											target: 'checkingAllergy',
+										},
+									},
+								},
+								checkingAllergy: {
+									always: [
+										{ guard: 'hasAllergy', target: 'allergicReaction' },
+										{ target: 'normal' }, // Алиса спокойно пьёт чай
+									],
+								},
+								allergicReaction: {
+									entry: 'reduceBreathing',
+									always: [
+										{ guard: 'canStillBreathe', target: 'seekingInhaler' },
+										{ target: 'criticalCondition' },
+									],
+								},
+								seekingInhaler: {
+									always: [
+										{ guard: 'hasInhaler', target: 'recovering' },
+										{ target: 'criticalCondition' }, // ингалятор не найден
+									],
+								},
+								recovering: { after: { 2000: 'normal' } },
+								criticalCondition: { type: 'final' },
+							},
+						})
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>сначала делаем небольшой сетап</li>
+							<li>описываем типы</li>
+							<li>аллерген, наличие аллергии (различие персонажей живёт в контексте), текущее состояние и наличие ингалаятора</li>
+							<li>Проверки. Проверки опираются на значения контекста</li>
+							<li>Наличие аллергии?, персонаж ещё дышит?, а у нас есть ингалятор?</li>
+							<li>И мутации стейта (которые тоже не заависят от состояний)</li>
+							<li>В нашем случае — последствие воздействия аллергии</li>
+							<li>Создаём машину…</li>
+							<li>аллерген пока не определён, У Потапа есть аллергия, дыхание в норме, но нет ингалаятора</li>
+							<li>начальное состояние… поехали!</li>
+							<li></li>
+						</ol>
+					</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left vn__person_inactive" src="dist/image/character/alisa/alisa-tea.png" alt="Алиса (tea), спокойно пьёт" />
+						<img class="vn__person vn__person_right" src="dist/image/character/potap/potap-choking.png" alt="Потап (choking)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								«Машина» Потапа, остановка «конечная»
+							</div>
+						</div>
+					</div>
+					<aside class="notes">«Машина» Потапа, остановка «конечная»</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/alisa/alisa-tea.png" alt="Алиса (tea), спокойно пьёт" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/potap/potap-choking.png" alt="Потап (choking)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								А что у Алисы?
+							</div>
+						</div>
+					</div>
+					<aside class="notes">А что у Алисы?</aside>
+				</section>
+
+				<section data-background-color="#101418">
+					<h3>XState v5 — «одна машина, два исхода»</h3>
+					<pre><code class="language-ts" data-line-numbers="24-29|26|32-39|34-37|36|40-45|42|43" data-trim data-trim-whitespace data-line-numbers>
+						import { setup, assign } from 'xstate'
+
+						const allergyResponseMachine = setup({
+							types: {
+								context: {} as {
+									allergen: string | null
+									isAllergic: boolean   // ← различие персонажей живёт в контексте
+									breathingCapacity: number
+									hasInhaler: boolean
+								},
+							},
+							guards: {
+								hasAllergy: ({ context }) =>
+									context.isAllergic && context.allergen === 'chamomile',
+								canStillBreathe: ({ context }) => context.breathingCapacity > 20,
+								hasInhaler: ({ context }) => context.hasInhaler,
+							},
+							actions: {
+								reduceBreathing: assign({
+									breathingCapacity: ({ context }) => context.breathingCapacity - 30,
+								}),
+							},
+						}).createMachine({
+							context: {
+								allergen: null,
+								isAllergic: false,
+								breathingCapacity: 100,
+								hasInhaler: false,
+							},
+							initial: 'normal',
+							states: {
+								normal: {
+									on: {
+										SUBSTANCE_THROWN: { // коробка чая летит в лицо
+											actions: assign({ allergen: ({ event }) => event.substance }),
+											target: 'checkingAllergy',
+										},
+									},
+								},
+								checkingAllergy: {
+									always: [
+										{ guard: 'hasAllergy', target: 'allergicReaction' },
+										{ target: 'normal' }, // Алиса спокойно пьёт чай
+									],
+								},
+								allergicReaction: {
+									entry: 'reduceBreathing',
+									always: [
+										{ guard: 'canStillBreathe', target: 'seekingInhaler' },
+										{ target: 'criticalCondition' },
+									],
+								},
+								seekingInhaler: {
+									always: [
+										{ guard: 'hasInhaler', target: 'recovering' },
+										{ target: 'criticalCondition' }, // ингалятор не найден
+									],
+								},
+								recovering: { after: { 2000: 'normal' } },
+								criticalCondition: { type: 'final' },
+							},
+						})
+					</code></pre>
+					<aside class="notes">
+						<ol>
+							<li>сначала делаем небольшой сетап</li>
+							<li>описываем типы</li>
+							<li>аллерген, наличие аллергии (различие персонажей живёт в контексте), текущее состояние и наличие ингалаятора</li>
+							<li>Проверки. Проверки опираются на значения контекста</li>
+							<li>Наличие аллергии?, персонаж ещё дышит?, а у нас есть ингалятор?</li>
+							<li>И мутации стейта (которые тоже не заависят от состояний)</li>
+							<li>В нашем случае — последствие воздействия аллергии</li>
+							<li>Создаём машину…</li>
+							<li>аллерген пока не определён, У Потапа есть аллергия, дыхание в норме, но нет ингалаятора</li>
+							<li>начальное состояние… поехали!</li>
+							<li></li>
+						</ol>
+					</aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/alisa/alisa-tea.png" alt="Алиса (tea), спокойно пьёт" />
+						<img class="vn__person vn__person_right vn__person_inactive" src="dist/image/character/potap/potap-choking.png" alt="Потап (choking)" />
+					</div>
+					<aside class="notes"></aside>
+				</section>
+
+				<section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/alisa/alisa-tea.png" alt="Алиса (tea), спокойно пьёт" />
+					</div>
+					<aside class="notes"></aside>
+				</section>
+
+				<!-- 9.5 Окно -->
+				<section data-background-color="#05070c">
+					<br><br><br>
+					<h1 class="fx-title">…окно.</h1>
+					<p class="fx-sub">Дальний лес. Тишина. Только пчёлы Кузьмы гудят как прод в пятницу.</p>
+					<aside class="notes">
+						
+					</aside>
+				</section>
+
+				<!-- ============ ПОБЕДА ============ -->
+
+				<!-- 10.1 Оффер Алисы -->
+				<section class="vn" data-background-image="dist/image/background/hospital.png" data-background-color="#2a3440">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/alisa/alisa-happy.png" alt="Алиса (happy), оффер" />
+						<img class="vn__person vn__person_right vn__person_mirror vn__person_inactive" src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile)" />
+						<div class="vn__dialog">
+							<div class="vn__message vn__message_system">
+								Алиса получает оффер: её машина — единственная, доехавшая до демо
+								без фатальных багов. Прохор — её будущий тимлид.
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Алиса получает оффер — давайте порадуемся за неё</aside>
+				</section>
+
+				<!-- 10.2 Цитата Кузьмы -->
+				<section class="vn" data-background-image="dist/image/background/hospital.png" data-background-color="#2a3440">
+					<div class="vn__scene">
+						<img class="vn__person vn__person_left" src="dist/image/character/kuzma/kuzma-bandaged.png" alt="Кузьма (bandaged)" />
+						<div class="vn__dialog">
+							<div class="vn__name">Кузьма</div>
+							<div class="vn__message">
+								Менеджер по продукту, ну и спринт у нас выдался — просто жесть!
+								Мы тут вовсю внедряли функционал, писали чистый код, как вдруг
+								в нашей системе управления состоянием начали массово плодиться баги!
+							</div>
+						</div>
+					</div>
+					<aside class="notes">Кузьма тоже рад — этот хакатон подошёл к концу. Время подвести итоги</aside>
+				</section>
+
+				<!-- 10.3 Честный слайд -->
+				<section data-background-color="#101418">
+					<h3>Убивает не библиотека, а отсутствие модели</h3>
+					<table class="honesty">
+						<thead>
+							<tr><th>Погибший</th><th>Менеджер</th><th>Убило</th><th>Спас бы</th></tr>
+						</thead>
+						<tbody>
+							<tr class="fragment"><td>Василиса</td><td>useState</td><td>действие до async-проверки</td><td>флаг-этап phase</td></tr>
+							<tr class="fragment"><td>Митя</td><td>useReducer</td><td>переход без guard'а</td><td>guard в кейсе RUN_AWAY</td></tr>
+							<tr class="fragment"><td>Толя</td><td>Redux</td><td>устаревшие координаты</td><td>requestId в экшенах</td></tr>
+							<tr class="fragment"><td>Михаил</td><td>Zustand</td><td>«отмена» без отмены таймера</td><td>clearTimeout при отмене</td></tr>
+							<tr class="fragment"><td>Яша</td><td>MobX</td><td>каскад без disposer'ов</td><td>сохранить disposer'ы</td></tr>
+							<tr class="fragment"><td>Нина</td><td>Jotai</td><td>цикл мнения ⇄ угрозы</td><td>ациклический граф</td></tr>
+							<tr class="fragment"><td>Чеслав</td><td>Recoil</td><td>мёртвая библиотека</td><td>миграция до хакатона</td></tr>
+							<tr class="fragment"><td>Потап</td><td>Effector</td><td>хрупкая сеть узлов</td><td>один derived-стор</td></tr>
+							<tr class="fragment"><td>—</td><td>XState</td><td>«не серебряная пуля»</td><td>забытый isAllergic убивает и Алису</td></tr>
+						</tbody>
+					</table>
+					<aside class="notes">
+						Каждый менеджер мог спасти своего героя
+						<ul>
+							<li>Василиса, useState — действие до завершения async-проверки | один флаг-этап `phase` вместо гонки состояний</li>
+							<li>Митя, useReducer — переход без guard'а | guard в кейсе `RUN_AWAY`</li>
+							<li>Толя, Redux — устаревшие координаты при атаке | requestId в экшенах, отбрасывать поздние ответы</li>
+							<li>Михаил, Zustand — «отмена», не отменяющая таймер | `clearTimeout` рядом с переходом в `running`</li>
+							<li>Яша, MobX — каскад reactions без disposer'ов | сохранить disposer'ы, останавливать панику</li>
+							<li>Нина, Jotai — цикл мнения ⇄ угрозы | ациклический граф: мнение → угроза, без обратной петли</li>
+							<li>Чеслав, Recoil — мёртвая библиотека | миграция до хакатона («никак» — в этом шутка)</li>
+							<li>Потап, Effector — хрупкая сеть из 6 узлов | один derived-стор вместо цепочки sample</li>
+							<li>—, XState — «не серебряная пуля» | забытый `isAllergic` в контексте убивает и Алису</li>
+						</ul>
+					</aside>
+				</section>
+
+				<!-- 10.4 Спасибо -->
+				<section data-background-color="#14121f">
+					<br><br><br>
+					<h1>Спасибо!</h1>
+					<p class="fx-sub">Будьте как Алиса: подождите две секунды, прежде чем делать вывод.<br />Вопросы?</p>
+					<aside class="notes">Финальная мысль. Q&amp;A.</aside>
+				</section>
+
+				<!-- Б1. Backstage-цикл: 6 кадров по 15с, кроссфейд 1.5с, бесконечно (под Q&A) -->
+				<section class="bts" data-background-color="#0b0d12">
+					<div class="bts__frame" aria-hidden="true">
+						<img class="bts__img" style="animation-delay: -1.5s, 0s" src="dist/image/backstage/tea-props.png" alt="" />
+						<img class="bts__img" style="animation-delay: 13.5s, 15s" src="dist/image/backstage/fake-bees.png" alt="" />
+						<img class="bts__img" style="animation-delay: 28.5s, 30s" src="dist/image/backstage/lake-tank.png" alt="" />
+						<img class="bts__img" style="animation-delay: 43.5s, 45s" src="dist/image/backstage/everyone-alive.png" alt="" />
+						<img class="bts__img" style="animation-delay: 58.5s, 60s" src="dist/image/backstage/foam-stacktrace.png" alt="" />
+						<img class="bts__img" style="animation-delay: 73.5s, 75s" src="dist/image/backstage/directors-chair.png" alt="" />
+					</div>
+					<aside class="notes">Backstage-цикл под Q&amp;A: реквизит чая → плюшевые пчёлы → озеро-бассейн → «все живы» → пенопластовая балка → кресло STATE MACHINE. Каждый кадр 15 секунд, кроссфейд 1.5с, цикл 90с, зациклено.</aside>
+				</section>
+
 			</div>
 		</div>
 
@@ -34,10 +2699,17 @@
 			// - https://revealjs.com/config/
 			Reveal.initialize({
 				hash: true,
+				width: 1280,
+				height: 720,
+				margin: 0,
+				center: false,
+				transition: 'fade',
+				slideNumber: true,
 
 				// Learn about plugins: https://revealjs.com/plugins/
 				plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
 			});
 		</script>
+		<script src="js/vn-typewriter.js"></script>
 	</body>
 </html>

@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Убойный хакатон: вариант B (VN HUD)</title>
+    <link rel="icon" href="data:," />
+
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" />
+    <link rel="stylesheet" href="dist/plugin/highlight/monokai.css" />
+
+    <!-- Shared VN components (variant A / B) -->
+    <link rel="stylesheet" href="css/vn.css" />
+    <!-- Variant B: viewport-anchored HUD overrides -->
+    <link rel="stylesheet" href="css/vn-hud.css" />
+    <style>
+      section.vn {
+        height: 100%;
+      }
+      /* внутренний голос — курсив */
+      .vn__message_thought {
+        font-style: italic;
+        opacity: 0.85;
+      }
+      /* эффект-объекты: оверлеи поверх сцены (смерти/удары «за кадром») */
+      .vn__fx {
+        position: absolute;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .vn__fx_bees {
+        animation: vn-bob 1.2s ease-in-out infinite alternate;
+      }
+      @keyframes vn-bob {
+        from { translate: 0 0; }
+        to { translate: 0 -14px; }
+      }
+      /* эффект-титры: эхо, ветка, stack trace */
+      .fx-title {
+        font-size: 72px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        line-height: 1.15;
+      }
+      .fx-sub {
+        font-size: 26px;
+        opacity: 0.7;
+        margin-top: 24px;
+      }
+      .fx-stacktrace {
+        font-family: monospace;
+        font-size: 22px;
+        color: #ff6b6b;
+        text-align: left;
+        white-space: pre;
+      }
+      /* честный слайд */
+      .honesty {
+        font-size: 20px;
+      }
+      .honesty th,
+      .honesty td {
+        padding: 4px 12px;
+      }
+      .honesty td:first-child {
+        font-weight: 700;
+      }
+      .honesty td:nth-child(2) {
+        color: #7aa2f7;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+        <!-- ============ ЗАЧИН (трейлер) ============ -->
+
+        <!-- Т1. Зачин: трейлер -->
+        <section class="vn" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+          <div class="vn__scene">
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Кузьма и Прохор проводят сеанс параллельного собеседования кандидатов
+                на стажировку в их команду. В финал после 20 этапов собеседований
+                с, как они себя называют, «эй!-чарами» вышли девятеро претендентов.
+              </div>
+              <div class="vn__message vn__message_system">
+                Но в конце останется ТОЛЬКО! ОДИН!!! ПОБЕ… ТЕЛЬ? Нет.
+                Стейт-менеджер. Этой осенью вас ждёт остросюжетный хакатон.
+                Только на экранах HOLYJS!!!!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">
+            Трейлер-зачин заменяет рекап фильма: половина зала его не смотрела, спойлеры легальны.
+            Девятеро кандидатов, каждый со своим стейт-менеджером.
+          </aside>
+        </section>
+
+        <!-- Т2. Зачин: ценз -->
+        <section class="vn" data-background-image="dist/image/background/title-poster.png" data-background-color="#14121f">
+          <div class="vn__scene">
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Возрастные ограничения: не менее 5 выгораний — или 3+ успешно
+                запущенных проекта, написанных с нуля.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Юмор-титр, пауза на смех.</aside>
+        </section>
+
+        <!-- ============ СЦЕНА 0. «ЗАПРАВКА» ============ -->
+
+        <!-- 0.1 Рассказчик -->
+        <section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile) — плейсхолдер" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/potap/potap-smug.png" alt="Потап (smug) — плейсхолдер" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Перед началом испытания Прохор, как заботливый и опытный тимлид,
+                заинтересованный в… очевидно, самом архитектурно-верном решении
+                с минимальной стоимостью на поддержание и развитие… решает дать
+                совет-напутствие перед началом хакатона-испытания.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Сетап. Прохор сейчас начнёт говорить — его перебьют.</aside>
+        </section>
+
+        <!-- 0.2 Потап перебивает -->
+        <section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left vn__person_inactive">
+              <img src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror">
+              <img src="dist/image/character/potap/potap-smug.png" alt="Потап (smug)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Потап</div>
+              <div class="vn__message">
+                TAILWIND! Мы возьмём Реакт, Vite v27.29.4 VIP Edition и Effector!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Потап — альфа-группы, выбрал стек за всех. Ему ответят.</aside>
+        </section>
+
+        <!-- 0.3 «Ради БЭМа» -->
+        <section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/prokhor/prokhor-neutral.png" alt="Прохор (neutral)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Прохор</div>
+              <div class="vn__message">
+                По взаимному согласию — ради БЭМа.
+              </div>
+              <div class="vn__message vn__message_system">
+                (Прохор недоумевает: почему студентов так испугало слово из трёх букв?)
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Слово «БЭМ» подсветить голосом. Зритель ещё не знает, что для Потапа это семейная трагедия — флешбек впереди.</aside>
+        </section>
+
+        <!-- 0.4 Испуг -->
+        <section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/potap/potap-terrified.png" alt="Потап (terrified)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Студенты в ужасе. Слово из трёх букв прозвучало как приговор.
+                Его время объясниться придёт позже.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Закладка флешбека. Не объяснять сейчас.</aside>
+        </section>
+
+        <!-- 0.5 «Коммитьте почаще» -->
+        <section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/prokhor/prokhor-shout.png" alt="Прохор (shout)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Прохор</div>
+              <div class="vn__message">
+                Главное — коммитьте почаще!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Студенты убегают. Просто шутка — второй выстрел не планируется.</aside>
+        </section>
+
+        <!-- 0.6 Чай (ружьё Чехова) -->
+        <section class="vn" data-background-image="dist/image/background/gas-station.png" data-background-color="#3a2a14">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile) с коробкой чая" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Проходя мимо полки, Прохор берёт коробку ромашкового чая.
+                Просто любит чай. Запомните этот чай.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Ружьё Чехова №1. Выстрелит в финале.</aside>
+        </section>
+
+        <!-- ============ СЦЕНА 1. «ОЗЕРО» ============ -->
+
+        <!-- 1.1 Вайбкодинг в озере -->
+        <section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/vasilisa/vasilisa-neutral.png" alt="Василиса (neutral)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror">
+              <img src="dist/image/character/nina/nina-neutral.png" alt="Нина (neutral)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Девятеро вайбкодят прямо в озере: ноуты на надувных подлокотниках,
+                вода кипит от запросов к ИИ.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Абсурд мира: кодинг в озере — норма. Алиса тоже здесь (за кадром).</aside>
+        </section>
+
+        <!-- 1.2 Лимиты -->
+        <section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/vasilisa/vasilisa-neutral.png" alt="Василиса (neutral)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Василиса</div>
+              <div class="vn__message">
+                Лимиты обновились! Бежим скорее вайбкодить!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Все выбегают из озера. Алиса остаётся.</aside>
+        </section>
+
+        <!-- 1.3 Ветка утонула -->
+        <section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/alisa/alisa-panic.png" alt="Алиса (panic)" />
+            </div>
+            <img class="vn__fx" style="left: 10%; top: 42%; width: 34%" src="dist/image/object/splash.png" alt="всплеск" />
+            <div class="vn__dialog">
+              <div class="vn__name">Алиса</div>
+              <div class="vn__message">
+                Ветка утонула!
+              </div>
+              <div class="vn__message vn__message_system">
+                (Ноутбук выскальзывает и тонет. Вместе с веткой. Всей ночной работы. Алиса ныряет следом.)
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Авария простая, без техно-причин: «просто утопила».</aside>
+        </section>
+
+        <!-- 1.4 Прохор спасает -->
+        <section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/prokhor/prokhor-concerned.png" alt="Прохор (concerned)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/alisa/alisa-neutral.png" alt="Алиса (neutral)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Прохор вытаскивает Алису и ноутбук. Чинит на берегу, бормочет вполголоса:
+              </div>
+              <div class="vn__name">Прохор</div>
+              <div class="vn__message">
+                SSH-ключ был успешно установлен…
+              </div>
+            </div>
+          </div>
+          <aside class="notes">SSH-шутки — фоном при починке, не сигнал недоразумения.</aside>
+        </section>
+
+        <!-- 1.5 Мысль Василисы -->
+        <section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/vasilisa/vasilisa-annoyed.png" alt="Василиса (annoyed)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Василиса</div>
+              <div class="vn__message vn__message_thought">
+                Опять этот дед произносит слова из трёх букв… Не буду мудрить,
+                возьму useState.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Курсив = мысль. Подпись под выбором инструмента — это её менеджер.</aside>
+        </section>
+
+        <!-- 1.6 PGP -->
+        <section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/vasilisa/vasilisa-annoyed.png" alt="Василиса (annoyed)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Прохор</div>
+              <div class="vn__message">
+                А ещё есть такая интересная штука — PGP!
+              </div>
+              <div class="vn__name">Василиса</div>
+              <div class="vn__message">
+                Снова слово из трёх букв! Чё за кринж!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Василиса убегает догонять своих.</aside>
+        </section>
+
+        <!-- 1.7 Крик Прохора -->
+        <section class="vn" data-background-image="dist/image/background/lake-day.png" data-background-color="#0d2f3f">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/prokhor/prokhor-shout.png" alt="Прохор (shout)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Прохор</div>
+              <div class="vn__message">
+                Мы взяли вашу подругу — она промокла!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Канонический перевод «We got your friend!». Первый сигнал недоразумения.</aside>
+        </section>
+
+        <!-- 1.8 Эхо -->
+        <section data-background-color="#05070c">
+          <h1 class="fx-title">«МЫ ВЗЯЛИ ВАШУ ПОДРУГУ…»</h1>
+          <p class="fx-sub">Студенты уже далеко. Они слышали только обрывок.<br />Этого достаточно.</p>
+          <aside class="notes">Драматическая пауза. Событие без контекста — тема доклада.</aside>
+        </section>
+
+        <!-- ============ СЦЕНА 2. «ДОМ КУЗЬМЫ, РАЗВЕДКА» ============ -->
+
+        <!-- 2.1 Сборы -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/mikhail/mikhail-determined.png" alt="Михаил (determined), ноут под мышью" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/potap/potap-commanding.png" alt="Потап (commanding)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Утро. Ребята собираются показать Кузьме то, что навайбкодили за ночь.
+                Это официальный повод. Неофициальный — вытащить Алису из «плена».
+                Право презентации поручено Михаилу. (Презентация так и не начнётся.)
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Как в фильме: сборы у дома перед нападением. Ирония: презентации не будет.</aside>
+        </section>
+
+        <!-- 2.2 Митя к окну -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/mitya/mitya-sneaky.png" alt="Митя (sneaky)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Первым к окну подходит Митя. За стеклом — картина, которой он
+                не ждал.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Переход к кадру-в-кадре.</aside>
+        </section>
+
+        <!-- 2.3 Кадр-в-кадре: окно -->
+        <section class="vn" data-background-image="dist/image/background/window-view.png" data-background-color="#33230f">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/alisa/alisa-sleeping.png" alt="Алиса (sleeping)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror">
+              <img src="dist/image/character/prokhor/prokhor-review-tea.png" alt="Прохор (review-tea)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Алиса неподвижна — лицом в код. Прохор колдует над ЕЁ ноутбуком.
+                Две чашки. Из них идёт пар.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Ключевой арт сцены. Для зала — ревью и романс. Для студентов — захват. Ромашковый чай уже здесь.</aside>
+        </section>
+
+        <!-- 2.4 Василиса считает -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/vasilisa/vasilisa-thinking.png" alt="Василиса (thinking)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Василиса</div>
+              <div class="vn__message">
+                Так. Подруга внутри… чужой над её ноутом… не двигается…
+                и Потап говорил, что захват. Всё сходится!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Считает на пальцах. Дальше — её код.</aside>
+        </section>
+
+        <!-- КОД: Василиса, 5 флагов -->
+        <section data-background-color="#101418">
+          <h3>Василиса · useState</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+const [friendInside] = useState(true);
+const [strangerAtHerLaptop] = useState(true);
+const [sheIsNotMoving] = useState(true);
+const [steamFromCups] = useState(true);
+const [potapSaysCaptured] = useState(true);
+
+// 2^5 = 32 состояния. Достижимых логикой — единицы
+if (friendInside && strangerAtHerLaptop
+    && sheIsNotMoving && potapSaysCaptured) {
+  verdict = 'KIDNAPPING'; // пар из чашек в условие не вошёл
+}
+          </code></pre>
+          <aside class="notes">Полный листинг — assets/code.md, «Сцена 2». Панчлайн: событие и срез без контекста.</aside>
+        </section>
+
+        <!-- КОД: Алиса, XState -->
+        <section data-background-color="#101418">
+          <h3>Алиса · XState v5 — та же дверь, другой исход</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+states: {
+  observing: { after: { 2000: 'concluding' } },
+  concluding: {
+    always: [
+      { guard: 'sceneIsPeaceful', target: 'codeAndChamomile' },
+      { target: 'alarm' },
+    ],
+  },
+  codeAndChamomile: { type: 'final' },
+}
+// вывод физически невозможен без наблюдения:
+// 4 состояния против 32 комбинаций
+          </code></pre>
+          <aside class="notes">«2 секунды наблюдения против пяти флагов». code.md, «Сцена 2», СТАЛО.</aside>
+        </section>
+
+        <!-- 2.5 Митя лезет ближе -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/mitya/mitya-sneaky.png" alt="Митя (sneaky)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/kuzma/kuzma-chainsaw.png" alt="Кузьма (chainsaw), пилит вдали" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Пока группа совещается, Митя лезет ближе — рассмотреть Кузьму.
+                Тот мирно пилит дрова. Бензопила случайно задевает улей.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Улей — деталь фона house-window. Дальше — паника.</aside>
+        </section>
+
+        <!-- 2.6 Пчёлы и бег -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left vn__person_inactive">
+              <img src="dist/image/character/kuzma/kuzma-bees-panic.png" alt="Кузьма (bees-panic)" />
+            </div>
+            <img class="vn__fx vn__fx_bees" style="left: 8%; top: 4%; width: 24%" src="dist/image/object/bees.png" alt="рой пчёл" />
+            <div class="vn__person vn__person_right vn__person_mirror">
+              <img src="dist/image/character/mitya/mitya-panic-run.png" alt="Митя (panic-run)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Рой пчёл кружит над Кузьмой — тот машет бензопилой. Митя бежит,
+                не глядя.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Смерть за кадром. Дальше — эффект-титр и код Мити.</aside>
+        </section>
+
+        <!-- 2.7 Ветка -->
+        <section data-background-color="#05070c">
+          <img src="dist/image/object/branch.png" alt="ветка" style="display: block; width: 34%; margin: 0 auto 18px;" />
+          <h1 class="fx-title">ВЕТКА.</h1>
+          <p class="fx-sub">Разведка окончена.</p>
+          <aside class="notes">Чёрная комедия: смерть иконкой, без жестокости.</aside>
+        </section>
+
+        <!-- КОД: Митя, useReducer -->
+        <section data-background-color="#101418">
+          <h3>Митя · useReducer — «бежал не глядя»</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+case 'RUN_AWAY':
+  // БАГ: нет guard'а на проверку пути
+  return { ...state, position: 'running' };
+
+case 'LOOK_WHERE_RUNNING':
+  // НИКОГДА не диспатчится при panicLevel > 5:
+  // некому его отправить — dispatcher сам в панике
+  return { ...state, panicLevel: state.panicLevel - 3 };
+
+case 'HIT_OBSTACLE':
+  if (state.position === 'running')
+    return { ...state, position: 'impaled' }; // 🌿
+          </code></pre>
+          <aside class="notes">Редьюсер описывает данные, а не пути. Спас бы: guard в кейсе RUN_AWAY. code.md, «Митя».</aside>
+        </section>
+
+        <!-- ============ КАСКАД. «ОПЕРАЦИЯ "ОСВОБОЖДЕНИЕ"» ============ -->
+
+        <!-- 3.1 Толя идёт -->
+        <section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left vn__person_inactive">
+              <img src="dist/image/character/prokhor/prokhor-shovel.png" alt="Прохор (shovel), копает спиной" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror">
+              <img src="dist/image/character/tolya/tolya-determined.png" alt="Толя (determined), копьё" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Прохор копает яму — сажает картошку. Толя идёт в атаку со своим
+                копьём. Фича, летящая в прод без тестов.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Прохор спиной — даже не замечает атаки.</aside>
+        </section>
+
+        <!-- КОД: Толя, Redux -->
+        <section data-background-color="#101418">
+          <h3>Толя · Redux — «атаковал пустое место»</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+case ATTACK:
+  // БАГ: нет проверки актуальности координат
+  return { ...state, isAttacking: true };
+
+case TARGET_MOVES: // асинхронно, прилетело ПОСЛЕ ATTACK
+  return { ...state, targetPosition: action.payload };
+  // но isAttacking уже true — стор не знает, что атака устарела
+
+// Прохор разгибается за очередным клубнем.
+// Толя атакует пустое место → собственное копьё
+          </code></pre>
+          <aside class="notes">Гонка асинхронных диспатчей. Спас бы: requestId в экшенах. code.md, «Толя».</aside>
+        </section>
+
+        <!-- 3.2 Итог Толи -->
+        <section data-background-color="#05070c">
+          <h1 class="fx-title">СВОЁ КОПЬЁ.</h1>
+          <p class="fx-sub">Прохор так и не заметил нападения. Он занят картошкой.</p>
+          <aside class="notes">За кадром. Пауза.</aside>
+        </section>
+
+        <!-- 4.1 Михаил решает -->
+        <section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left vn__person_inactive">
+              <img src="dist/image/character/kuzma/kuzma-neutral.png" alt="Кузьма (neutral), у дровокола" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror">
+              <img src="dist/image/character/mikhail/mikhail-determined.png" alt="Михаил (determined)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Михаил</div>
+              <div class="vn__message">
+                Презентация не состоялась. Значит, решаю проблему радикально:
+                Кузьма стоит у дровокола — идеальная цель.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Закладка «презентация так и не начнётся» выстрелила.</aside>
+        </section>
+
+        <!-- КОД: Михаил, Zustand -->
+        <section data-background-color="#101418">
+          <h3>Михаил · Zustand — «отмена не отменяет таймер»</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+executeAttack: () => {
+  set({ currentAction: 'running' });
+  setTimeout(() => {           // handle не сохранён. Отменить некому
+    set({ currentAction: 'tackling' });  // точка невозврата
+    if (obstacle?.type === 'wood_chipper') {
+      set({ currentAction: 'idle' });
+      // 💀 стейт вернулся в idle. Михаил — нет
+    }
+  }, 500);
+},
+cancelAttack: () => set({ currentAction: 'idle' }),
+// отмена ПРОШЛА… но таймер всё равно выстрелит
+          </code></pre>
+          <aside class="notes">Флаг стейта ≠ отмена операции. Спас бы: clearTimeout рядом с переходом. code.md, «Михаил».</aside>
+        </section>
+
+        <!-- 4.2 Итог Михаила -->
+        <section data-background-color="#05070c">
+          <h1 class="fx-title">ДРОВОКОЛ.</h1>
+          <p class="fx-sub">Кузьма отошёл. Михаил — нет.</p>
+          <aside class="notes">За кадром.</aside>
+        </section>
+
+        <!-- 5.1 Гурий приезжает -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/guriy/guriy-sheriff.png" alt="Гурий (sheriff)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/cheslav/cheslav-proud.png" alt="Чеслав (proud)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Весть о «гибнущей команде» доходит до внешнего мира. Приезжает
+                Гурий — сеньор-QA на пенсии, с Vitest и ковбойской шляпой.
+              </div>
+              <div class="vn__name">Чеслав</div>
+              <div class="vn__message">
+                Сейчас я вам покажу свой стек!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Два новых героя. Чеславу даже сцена не нужна.</aside>
+        </section>
+
+        <!-- КОД: Чеслав, терминал Recoil -->
+        <section data-background-color="#0c0c0c">
+          <h3>Чеслав · Recoil — «умер на установке зависимостей»</h3>
+          <pre class="fx-stacktrace">$ npm i recoil
++ recoil@0.7.7
+added 5 packages in 2s
+found 0 vulnerabilities        ← npm молчит: пакет «жив»
+
+$ npm run dev
+TypeError: ...__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED is undefined
+    at useRecoilValueLoadable (index.js:5353)</pre>
+          <aside class="notes">Факты: репозиторий заархивирован 01.01.2025, последний релиз 01.03.2023, deprecation-флага нет, сайт жив. Умер раньше рантайма. code.md, «Гурий и Чеслав».</aside>
+        </section>
+
+        <!-- 5.2 Гурий: всё зелёное -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/guriy/guriy-smug.png" alt="Гурий (smug)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Гурий</div>
+              <div class="vn__message">
+                У меня всё зелёное. Вы всё выдумали.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Направляется к продовому стейту сам.</aside>
+        </section>
+
+        <!-- КОД: Гурий, красный тест -->
+        <section data-background-color="#101418">
+          <h3>Гурий · QA — хейзенбаг не живёт в песочнице</h3>
+          <pre><code class="language-ts" data-trim data-trim-whitespace>
+vi.useFakeTimers();
+const window = mockWindow({
+  /* полные данные, Потап не орёт */
+});
+expect(reconDecision(window)).toBe('KIDNAPPING');
+// ❌ КРАСНЫЙ: received 'SAFE'
+// в песочнице контекст всегда на месте —
+// баг «событие без контекста» там не воспроизводится
+          </code></pre>
+          <aside class="notes">Тестирование не спасает от неверной модели. Спас бы: интеграционный тест с реальным порядком событий. code.md, «Гурий и Чеслав».</aside>
+        </section>
+
+        <!-- 5.3 Балка = stack trace -->
+        <section data-background-color="#1a0505">
+          <pre class="fx-stacktrace">Error: KIDNAPPING is not a bug
+    at production (everyone/is-dying.js:42)
+    at Sheriff.inspect (prod-state.js:511)
+    ────────────────────────────────────
+    stack trace падает Гурию на голову</pre>
+          <aside class="notes">Балка из фильма = stack trace. Текст-оверлей на весь кадр.</aside>
+        </section>
+
+        <!-- 6.1 Огонь: Потап и Яша -->
+        <section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left vn__person_inactive">
+              <img src="dist/image/character/potap/potap-burner.png" alt="Потап (burner)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror">
+              <img src="dist/image/character/yasha/yasha-on-fire.png" alt="Яша (on-fire)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Потап, доведённый до ручки, неудачно махнул горелкой. Загорается Яша.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Контур пламени — часть спрайта yasha-on-fire. Комедийный огонь, без жестокости.</aside>
+        </section>
+
+        <!-- КОД: Яша, MobX -->
+        <section data-background-color="#101418">
+          <h3>Яша · MobX — «каскад без стоп-крана»</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+reaction(() => this.isOnFire, () => { this.painLevel = 10; });
+reaction(() => this.painLevel, (pain) => {
+  if (pain > 7) this.runRandomly();
+});
+reaction(() => this.position, () => this.runRandomly()); // петля!
+
+// reaction() возвращает disposer. Все три — выброшены.
+// Остановить это больше нельзя
+          </code></pre>
+          <aside class="notes">Спас бы: сохранить disposer'ы и вызывать при выходе из паники. code.md, «Яша».</aside>
+        </section>
+
+        <!-- 6.2 Василиса и канистра -->
+        <section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/vasilisa/vasilisa-horror.png" alt="Василиса (horror), канистра" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Василиса</div>
+              <div class="vn__message vn__message_thought">
+                Не буду мудрить — хватаю ближайшую канистру…
+              </div>
+              <div class="vn__message vn__message_system">
+                (Идентификация жидкости завершится через 0.4 секунды ПОСЛЕ броска.
+                Это была не вода.)
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Второй выход Василисы: та же присказка, фатальнее.</aside>
+        </section>
+
+        <!-- КОД: Василиса, огонь -->
+        <section data-background-color="#101418">
+          <h3>Василиса · useState — «бросок до идентификации»</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+useEffect(() => {
+  if (!jasonOnFire) return;
+
+  throwLiquid(canisters.nearest);   // БРОСОК — сразу
+
+  const id = setTimeout(() =>
+    setCanister(
+      identifyLiquid(canisters.nearest) // проверка — потом 🙃
+    ), 400);
+}, [jasonOnFire]);
+// порядок операций живёт в голове, а не в стейте
+          </code></pre>
+          <aside class="notes">Спас бы: один флаг-этап phase: 'identifying' | 'readyToThrow'. code.md, «Василиса».</aside>
+        </section>
+
+        <!-- 7.1 Нина -->
+        <section class="vn" data-background-image="dist/image/background/lake-evening.png" data-background-color="#1d1633">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/nina/nina-frozen.png" alt="Нина (frozen)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Нину находят у кромки воды. Она сидит неподвижно и смотрит
+                в одну точку. Губы шевелятся: «друзья… захват… друзья… захват…»
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Петля из фильма = бесконечный цикл. Глитч-мерцание спрайта — опционально.</aside>
+        </section>
+
+        <!-- КОД: Нина, Jotai -->
+        <section data-background-color="#101418">
+          <h3>Нина · Jotai — «зациклилась»</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+const potapOpinionAtom = atom('друзья');
+const threatLevelAtom = atom((get) =>
+  get(potapOpinionAtom) === 'захват!' ? 100 : 0);
+
+const reevaluateAtom = atom(null, (get, set) =>
+  set(potapOpinionAtom,
+      get(threatLevelAtom) > 50 ? 'друзья' : 'захват!'));
+
+store.sub(threatLevelAtom, () => store.set(reevaluateAtom));
+// 'захват!' → 100 → 'друзья' → 0 → …
+// цикл СИНХРОННЫЙ и вечный. Ошибок нет. Вкладка не отвечает
+          </code></pre>
+          <aside class="notes">Проверено на jotai 3.0.1: детекции циклов нет. Альтернатива-крэш — RangeError — в code.md, факты для спикера.</aside>
+        </section>
+
+        <!-- 8.1 Флешбек Потапа -->
+        <section class="vn" data-background-image="dist/image/background/terminal-red.png" data-background-color="#200a0a">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/potap/potap-dark.png" alt="Потап (dark), силуэт" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Пока команда гибнет, Потап вспоминает. Отец. Ночь. Легаси
+                на jQuery и БЭМ. Красное окно сборки. Сгоревший дедлайн.
+                Тишина в доме.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Объяснение сцены 0: почему «БЭМ» — приговор. Тёмная палитра.</aside>
+        </section>
+
+        <!-- 8.2 Клятва Потапа -->
+        <section class="vn" data-background-image="dist/image/background/yard.png" data-background-color="#2e2414">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/potap/potap-commanding.png" alt="Потап (commanding)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Потап</div>
+              <div class="vn__message">
+                Они все такие. Старая школа. Она забирает лучших.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Мотив антагониста замкнут. Дальше — финал.</aside>
+        </section>
+
+        <!-- ============ ФИНАЛ. «РОМАШКОВЫЙ ЧАЙ» ============ -->
+
+        <!-- 9.1 Потап идёт с горелкой -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/potap/potap-burner.png" alt="Потап (burner)" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/kuzma/kuzma-neutral.png" alt="Кузьма (neutral)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Кульминация у дома. Потап — последний из команды — идёт на Кузьму
+                и Прохора с горелкой.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Финальная конфронтация.</aside>
+        </section>
+
+        <!-- 9.2 Бросок чая -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/prokhor/prokhor-throw.png" alt="Прохор (throw)" />
+            </div>
+            <img class="vn__fx" style="left: 44%; top: 36%; width: 14%" src="dist/image/object/tea.png" alt="коробка чая в полёте" />
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Прохор, не глядя, бросает в него первое, что попадает под руку.
+                Коробку ромашкового чая.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Ружьё Чехова выстреливает. Эффект: коробка чая в полёте.</aside>
+        </section>
+
+        <!-- 9.3 Аллергия -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/potap/potap-choking.png" alt="Потап (choking)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                У Потапа аллергия на ромашку. И астма. Ингалятор — в куртке,
+                оставшейся у дровокола.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Дальше — коллапс его Effector-сети.</aside>
+        </section>
+
+        <!-- КОД: Потап, Effector -->
+        <section data-background-color="#101418">
+          <h3>Потап · Effector — «коллапс сети»</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+sample({ clock: allergenDetected, target: breathingDifficulty });
+sample({ clock: breathingDifficulty, target: needsInhaler });
+sample({ clock: needsInhaler, source: $hasInhaler,
+         filter: (has) => !has, target: inhalerNotFound });
+sample({ clock: inhalerNotFound, target: panicIntensifies });
+sample({ clock: panicIntensifies, source: $canBreathe,
+         filter: (can) => !can,
+         fn: () => console.log('💀 Потап падает из окна') });
+
+// граф из 6 узлов и 5 sample. Забыл один — цепь рвётся.
+// Никто не виноват: ни один узел не знает про остальных
+          </code></pre>
+          <aside class="notes">code.md, «Потап». Спас бы: один derived-стор вместо цепочки.</aside>
+        </section>
+
+        <!-- 9.4 Одна машина — два исхода -->
+        <section class="vn" data-background-image="dist/image/background/house-window.png" data-background-color="#16301c">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/alisa/alisa-tea.png" alt="Алиса (tea), спокойно пьёт" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/potap/potap-choking.png" alt="Потап (choking)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Одна и та же машина. Разный контекст. Алиса спокойно пьёт чай.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Визуальная пара: tea vs choking — иллюстрация к коду ниже.</aside>
+        </section>
+
+        <!-- КОД: XState-финал -->
+        <section data-background-color="#101418">
+          <h3>XState v5 — «одна машина, два исхода»</h3>
+          <pre><code class="language-js" data-trim data-trim-whitespace>
+checkingAllergy: {
+  always: [
+    { guard: 'hasAllergy', target: 'allergicReaction' },
+    { target: 'normal' }, // Алиса спокойно пьёт чай
+  ],
+},
+
+// hasAllergy:
+//   context.isAllergic && context.allergen === 'chamomile'
+// Алиса:  SUBSTANCE_THROWN → normal ✅ (isAllergic: false)
+// Потап:  SUBSTANCE_THROWN → criticalCondition ❌ (ингалятора нет)
+// различие — в контексте, а не в коде
+          </code></pre>
+          <aside class="notes">Панчлайн: «выживает та модель, которую понял». Потап падает за кадром (9.5 → окно, звук).</aside>
+        </section>
+
+        <!-- 9.5 Окно -->
+        <section data-background-color="#05070c">
+          <h1 class="fx-title">…окно.</h1>
+          <p class="fx-sub">Дальний лес. Тишина. Только пчёлы Кузьмы гудят как прод в пятницу.</p>
+          <aside class="notes">Смерть Потапа — за кадром, звуком.</aside>
+        </section>
+
+        <!-- ============ ПОБЕДА ============ -->
+
+        <!-- 10.1 Оффер Алисы -->
+        <section class="vn" data-background-image="dist/image/background/hospital.png" data-background-color="#2a3440">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/alisa/alisa-happy.png" alt="Алиса (happy), оффер" />
+            </div>
+            <div class="vn__person vn__person_right vn__person_mirror vn__person_inactive">
+              <img src="dist/image/character/prokhor/prokhor-smile.png" alt="Прохор (smile)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__message vn__message_system">
+                Алиса получает оффер: её машина — единственная, доехавшая до демо
+                без фатальных багов. Прохор — её будущий тимлид.
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Романс — намёком, как в фильме.</aside>
+        </section>
+
+        <!-- 10.2 Цитата Кузьмы -->
+        <section class="vn" data-background-image="dist/image/background/hospital.png" data-background-color="#2a3440">
+          <div class="vn__scene">
+            <div class="vn__person vn__person_left">
+              <img src="dist/image/character/kuzma/kuzma-bandaged.png" alt="Кузьма (bandaged)" />
+            </div>
+            <div class="vn__dialog">
+              <div class="vn__name">Кузьма</div>
+              <div class="vn__message">
+                Product Manager, we have had a doozy of a sprint! There we were,
+                implementing features, writing clean code, when all of a sudden
+                these bugs started killing themselves all over our state management!
+              </div>
+            </div>
+          </div>
+          <aside class="notes">Адаптация финальной цитаты Такера из фильма.</aside>
+        </section>
+
+        <!-- 10.3 Честный слайд -->
+        <section data-background-color="#101418">
+          <h3>Убивает не библиотека, а отсутствие модели</h3>
+          <table class="honesty">
+            <thead>
+              <tr><th>Погибший</th><th>Менеджер</th><th>Убило</th><th>Спас бы</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Василиса</td><td>useState</td><td>действие до async-проверки</td><td>флаг-этап phase</td></tr>
+              <tr><td>Митя</td><td>useReducer</td><td>переход без guard'а</td><td>guard в кейсе RUN_AWAY</td></tr>
+              <tr><td>Толя</td><td>Redux</td><td>устаревшие координаты</td><td>requestId в экшенах</td></tr>
+              <tr><td>Михаил</td><td>Zustand</td><td>«отмена» без отмены таймера</td><td>clearTimeout при отмене</td></tr>
+              <tr><td>Яша</td><td>MobX</td><td>каскад без disposer'ов</td><td>сохранить disposer'ы</td></tr>
+              <tr><td>Нина</td><td>Jotai</td><td>цикл мнения ⇄ угрозы</td><td>ациклический граф</td></tr>
+              <tr><td>Чеслав</td><td>Recoil</td><td>мёртвая библиотека</td><td>миграция до хакатона</td></tr>
+              <tr><td>Потап</td><td>Effector</td><td>хрупкая сеть узлов</td><td>один derived-стор</td></tr>
+              <tr><td>—</td><td>XState</td><td>«не серебряная пуля»</td><td>забытый isAllergic убивает и Алису</td></tr>
+            </tbody>
+          </table>
+          <aside class="notes">Финал честный: XState не фаворит. Полная таблица — code.md, «Честный слайд».</aside>
+        </section>
+
+        <!-- 10.4 Спасибо -->
+        <section data-background-color="#14121f">
+          <h1>Спасибо!</h1>
+          <p class="fx-sub">Будьте как Алиса: подождите две секунды, прежде чем делать вывод.<br />Вопросы?</p>
+          <aside class="notes">Финальная мысль. Q&amp;A.</aside>
+        </section>
+
+      </div>
+
+      <!-- VN HUD: внутри .reveal, но ВНЕ .slides — не масштабируется
+           transform'ом канваса и держит рамку на краях реального экрана. -->
+      <div id="vn-hud" aria-live="polite"></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="dist/plugin/notes.js"></script>
+    <script src="dist/plugin/markdown.js"></script>
+    <script src="dist/plugin/highlight.js"></script>
+
+    <script>
+      Reveal.initialize({
+        width: 1280,
+        height: 720,
+        margin: 0,
+        center: false,
+        transition: 'fade',
+        hash: true,
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+      });
+    </script>
+
+    <script>
+      // Variant B: mirror the current section's VN scene into the viewport
+      // HUD on ready and on every slide change. Non-VN slides leave it empty.
+      const hud = document.getElementById('vn-hud');
+      function syncHud() {
+        const slide = Reveal.getCurrentSlide();
+        hud.innerHTML = '';
+        const scene = slide && slide.querySelector('.vn__scene');
+        if (!scene) return;
+        const bg = slide.getAttribute('data-background-image') || slide.getAttribute('data-background');
+        if (bg) {
+          const layer = document.createElement('div');
+          layer.className = 'vn-hud__bg';
+          layer.style.backgroundImage = `url("${bg}")`;
+          hud.appendChild(layer);
+        }
+        hud.appendChild(scene.cloneNode(true));
+      }
+      Reveal.on('ready', syncHud);
+      Reveal.on('slidechanged', syncHud);
+    </script>
+  </body>
+</html>

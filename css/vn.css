@@ -1,0 +1,250 @@
+/* ==========================================================================
+   vn.css — Visual-novel (VN) scene components, variant-agnostic
+   --------------------------------------------------------------------------
+   Serves two variants without edits:
+     A) canvas variant — markup sits inside a 1280x720 reveal slide that
+        reveal scales via transform, so the px/% defaults below are right;
+     B) HUD variant — the scene is anchored to the real viewport; that
+        variant overrides the --vn-* custom properties on its own root.
+
+   Rules of this file: never positions the scene root, never uses viewport
+   units or fixed positioning (both double-scale / break in the transformed
+   canvas). Units are px, em and % only. Keyframes drive the individual
+   `translate` / `scale` properties so they compose with `transform`.
+
+   Layer order: persons (1) < dialog (2) < nameplate (3) < choices (4).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Tokens — 1280x720 canvas defaults (variants override freely)
+   -------------------------------------------------------------------------- */
+:root {
+  /* core knobs (contract) */
+  --vn-person-height: 80%;
+  --vn-dialog-height: 24%;
+  --vn-dialog-bg: rgba(10, 12, 18, 0.92);
+  --vn-dialog-border: rgba(255, 255, 255, 0.18);
+  --vn-accent: #7aa2f7;
+  --vn-font-size: 30px;
+  --vn-name-font-size: 20px;
+
+  /* optional refinements */
+  --vn-name-color: #141a2b;
+  --vn-message-color: rgba(245, 247, 252, 0.95);
+  --vn-message-system-color: rgba(245, 247, 252, 0.72);
+  --vn-choice-bg: rgba(10, 12, 18, 0.78);
+  --vn-choice-border: rgba(255, 255, 255, 0.22);
+  --vn-choice-color: rgba(245, 247, 252, 0.95);
+  --vn-radius: 10px;
+  --vn-dialog-highlight: rgba(255, 255, 255, 0.07);
+  --vn-anim-duration: 3s;
+  --vn-enter-duration: 0.5s;
+}
+
+/* --------------------------------------------------------------------------
+   Scene root — geometry only; the variant owns the positioning context
+   -------------------------------------------------------------------------- */
+.vn__scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Character sprites — feet on the scene floor, beneath the dialog (z: 1)
+   -------------------------------------------------------------------------- */
+.vn__person {
+  position: absolute;
+  bottom: 0;
+  height: var(--vn-person-height, 80%);
+  width: auto;
+  z-index: 1;
+  /* transition lives on the base class so (in)activation eases both ways */
+  transition: filter 0.4s ease;
+}
+
+/* Sprite reset — out-specifies deck-level `.reveal img` rules (theme margins
+   and 95% max-size clamps) regardless of stylesheet link order */
+.vn__scene img.vn__person {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  max-width: none;
+  max-height: none;
+}
+
+.vn__person_left   { left: 4%; }
+.vn__person_center { left: 50%; transform: translateX(-50%); }
+.vn__person_right  { right: 4%; }
+
+/* Mirrored sprite — `scale` (individual property, NOT transform) so it
+   composes with .vn__person_center's translateX and the anim classes */
+.vn__person_mirror { scale: -1 1; }
+
+/* Off-stage / not-speaking character */
+.vn__person_inactive {
+  filter: grayscale(100%) contrast(80%);
+}
+
+/* --------------------------------------------------------------------------
+   Dialog window — classic bottom message strip (z: 2)
+   -------------------------------------------------------------------------- */
+.vn__dialog {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--vn-dialog-height, 24%);
+  z-index: 2;
+  box-sizing: border-box;
+  display: flex;
+  align-items: start;
+  padding:
+    calc(var(--vn-font-size, 28px) * 0.9)
+    calc(var(--vn-font-size, 28px) * 0.9)
+    calc(var(--vn-font-size, 28px) * 0.45);
+  background: var(--vn-dialog-bg, rgba(10, 12, 18, 0.92));
+  border: 1px solid var(--vn-dialog-border, rgba(255, 255, 255, 0.18));
+  border-radius: var(--vn-radius, 10px) var(--vn-radius, 10px) 0 0;
+  /* subtle top border highlight */
+  box-shadow: inset 0 1px 0 var(--vn-dialog-highlight, rgba(255, 255, 255, 0.07));
+}
+
+/* --------------------------------------------------------------------------
+   Speaker nameplate — plate riding the dialog's top-left edge (z: 3)
+   -------------------------------------------------------------------------- */
+.vn__name {
+  position: absolute;
+  top: 0;
+  left: calc(var(--vn-font-size, 28px) * 0.9); /* aligns with dialog padding */
+  /* raised ~half a plate above the window edge; `translate` keeps this
+     composable with the animation utilities */
+  translate: 0 -50%;
+  z-index: 3;
+  padding: 0.3em 1.1em;
+  background: var(--vn-accent, #7aa2f7);
+  color: var(--vn-name-color, #141a2b);
+  font-size: var(--vn-name-font-size, 20px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase; /* small-caps feel */
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Replica text
+   -------------------------------------------------------------------------- */
+.vn__message {
+  margin: 0;
+  max-width: 90%;
+  color: var(--vn-message-color, rgba(245, 247, 252, 0.95));
+  font-size: var(--vn-font-size, 28px);
+  line-height: 1.45;
+  text-align: left; /* keep deck-level centering off the replica */
+}
+
+/* Narrator lines — italic, dimmer, never quoted */
+.vn__message_system {
+  font-style: italic;
+  color: var(--vn-message-system-color, rgba(245, 247, 252, 0.72));
+  quotes: none;
+}
+
+/* --------------------------------------------------------------------------
+   Choice list — floats above the dialog, horizontally centered (z: 4)
+   -------------------------------------------------------------------------- */
+.vn__choices {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--vn-dialog-height, 24%) + 4%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+
+/* --------------------------------------------------------------------------
+   Single choice — VN-style option button
+   -------------------------------------------------------------------------- */
+.vn__choice {
+  box-sizing: border-box;
+  padding: 0.5em 1.75em;
+  background: var(--vn-choice-bg, rgba(10, 12, 18, 0.78));
+  color: var(--vn-choice-color, rgba(245, 247, 252, 0.95));
+  border: 1px solid var(--vn-choice-border, rgba(255, 255, 255, 0.22));
+  border-radius: var(--vn-radius, 10px);
+  font-family: inherit;
+  font-size: var(--vn-font-size, 28px);
+  line-height: 1.45;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.vn__choice:hover {
+  border-color: var(--vn-accent, #7aa2f7);
+  transform: translateY(-0.15em); /* slight lift */
+  box-shadow: 0 0.4em 1em rgba(0, 0, 0, 0.35);
+}
+
+.vn__choice:focus-visible {
+  outline: 2px solid var(--vn-accent, #7aa2f7);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Animation utilities — one class each, composable via individual
+   `translate` (centering `transform` and mirror `scale` are preserved)
+   -------------------------------------------------------------------------- */
+.vn__anim_idle {
+  animation: vn-bob var(--vn-anim-duration, 3s) ease-in-out infinite;
+}
+
+.vn__anim_enter {
+  animation: vn-enter var(--vn-enter-duration, 0.5s) ease-out forwards;
+}
+
+@keyframes vn-bob {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -0.6%; }
+}
+
+@keyframes vn-enter {
+  from { opacity: 0; translate: 0 4%; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vn__anim_idle,
+  .vn__anim_enter {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Typewriter caret — blinking block cursor while js/vn-typewriter.js marks
+   a message mid-typing with .vn-typing
+   -------------------------------------------------------------------------- */
+.vn__message.vn-typing::after {
+  content: '▌';
+  color: var(--vn-accent, #7aa2f7);
+  margin-left: 0.15em;
+  animation: vn-caret-blink 0.9s steps(1) infinite;
+}
+
+@keyframes vn-caret-blink {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vn__message.vn-typing::after {
+    animation: none;
+  }
+}

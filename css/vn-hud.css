@@ -1,0 +1,59 @@
+/**
+ * Variant B — viewport-anchored VN HUD (pairs with hud.html).
+ *
+ * Why this exists: reveal scales `.slides` with `transform: scale()`, so any
+ * `vh`/`vmin` unit authored inside a slide gets visually double-scaled and
+ * `position: fixed` inside a transformed ancestor is not viewport-fixed.
+ *
+ * The fix: this HUD lives inside `.reveal` but OUTSIDE `.slides`. `.reveal`
+ * itself is viewport-sized and never scaled, so `position: absolute; inset: 0`
+ * here anchors to the real screen — fullbleed, true bottom edge, any aspect
+ * ratio. hud.html's sync script mirrors the current section's `.vn__scene`
+ * into `#vn-hud` on `ready`/`slidechanged`.
+ *
+ * Shared VN component styles (persons, dialog, choices, animations) come from
+ * css/vn.css. This file contains ONLY variant-B positioning/geometry overrides.
+ */
+
+/* HUD frame: fills the viewport-sized `.reveal`, floats above the scaled
+   slide canvas, lets clicks pass through to reveal navigation. */
+#vn-hud {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden;
+
+  /* Viewport typography: real vmin/vh against the actual screen, not the
+     scaled 1280x720 canvas. */
+  --vn-font-size: clamp(16px, 2.6vmin, 34px);
+  --vn-name-font-size: clamp(12px, 1.8vmin, 24px);
+  --vn-dialog-height: min(26%, 30vh);
+  --vn-person-height: min(80%, 78vh);
+}
+
+/* Fullbleed background owned by the HUD (cover on any window aspect),
+   independent of reveal's own scaled background layer. */
+.vn-hud__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Scene root fills the viewport HUD; `bottom: 0` inside it is the true
+   bottom edge of the display. */
+#vn-hud .vn__scene {
+  position: absolute;
+  inset: 0;
+}
+
+/* Hide the authored in-canvas originals — only the HUD clone is visible. */
+section.vn .vn__scene {
+  display: none;
+}
+
+/* Choices are interactive even though the HUD frame passes clicks through. */
+#vn-hud .vn__choice {
+  pointer-events: auto;
+}
